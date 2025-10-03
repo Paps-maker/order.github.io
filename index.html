@@ -274,7 +274,7 @@ deliveryMethod.addEventListener("change",()=>{
 placeOrderBtn.addEventListener("click",async()=>{
   if(!customerName.value || !customerPhone.value || (deliveryMethod.value==="delivery"&&!deliveryAddress.value)){ alert("Please fill all required fields!"); return; }
   const orderCode = "ORD-"+Date.now();
-  const totalValue = cart.reduce((s,i)=>s+i.price*i.qty,0)+(deliveryMethod.value==="delivery"?200:0);
+  const totalValue = cart.reduce((s,i)=>s+i.price*i.qty,0)+(deliveryMethod.value==="delivery"?40:0);
   const orderData = { code: orderCode, items:cart, total:totalValue, customer:{name:customerName.value,phone:customerPhone.value,delivery:deliveryMethod.value,address:deliveryAddress.value||""}, notes:orderNotes.value||"",status:"Pending",date:new Date()};
   await addDoc(collection(db,"orders"),orderData);
   alert("✅ Order submitted!");
@@ -388,7 +388,7 @@ viewOrdersBtn.addEventListener("click", ()=>{
 // -- Download PDF --
 window.downloadOrder = (code, items, total, name, phone, delivery, address, notes) => {
   const doc = new jsPDF();
-  doc.setFontSize(18); doc.text("🍔 Fast Food & Ice Cream", 14, 20);
+  doc.setFontSize(18); doc.text("Fast Food & Ice Cream", 14, 20);
   doc.setFontSize(12); doc.text("Order Receipt", 14, 30);
   doc.text(`Order Code: ${code}`, 14, 38);
   doc.text(`Name: ${name}`, 14, 46);
