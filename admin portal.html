@@ -372,7 +372,7 @@ function renderCart(){
   });
   document.getElementById("miniTotal").textContent = `Total is Ksh ${subtotal.toFixed(2)}`;
   document.getElementById("subTotal").value = subtotal.toFixed(2);
-  const tax = subtotal * 0.05;
+  const tax = subtotal * 0.0;
   document.getElementById("taxAmount").value = tax.toFixed(2);
   const total = subtotal + tax;
   document.getElementById("grandTotal").value = total.toFixed(2);
