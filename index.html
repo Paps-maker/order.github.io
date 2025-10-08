@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link rel="icon" type="image/png" href="img/ice.jpg">
-<title>Fast Food & Ice Cream POS</title>
+<title>Fast Food & Ice Cream SipDrip</title>
 <!-- jsPDF CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -364,7 +364,7 @@ placeOrderBtn.addEventListener("click", async () => {
 
   // PDF generation (unchanged)
   const doc = new jsPDF();
-  doc.setFontSize(18); doc.text("🍔 Fast Food & Ice Cream", 14, 20);
+  doc.setFontSize(18); doc.text("SIP & DRIP Fast Food & Ice Cream", 14, 20);
   doc.setFontSize(12); doc.text(`Order Receipt`, 14, 30);
   doc.text(`Order Code: ${orderCode}`, 14, 38);
   doc.text(`Name: ${customerName.value}`, 14, 46);
