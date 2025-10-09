@@ -166,10 +166,10 @@ background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:
     <div class="modal-body" style="padding:16px;text-align:center;">
       <p id="pointsInfo" style="font-size:16px;">You have <strong>0</strong> points.</p>
       <button id="redeemPointsBtn" style="background:var(--success);color:#fff;padding:10px;width:100%;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-bottom:8px;">
-        Redeem 500 Points (KSh 50 Off)
+        Redeem 50 Points (KSh 50 Off)
       </button>
       <button onclick="document.getElementById('pointsModal').style.display='none'" style="background:#6c757d;color:#fff;padding:10px;width:100%;border:none;border-radius:8px;cursor:pointer;">Close</button>
-      <p style="margin-top:10px;font-size:12px;color:#555;">Earn 5 points per KSh 500 spent. 2 points = KSh 1 off.</p>
+      <p style="margin-top:10px;font-size:12px;color:#555;">Earn 1 points per KSh 50 spent. 1 points = KSh 1 off.</p>
     </div>
   </div>
 </div>
@@ -259,13 +259,13 @@ document.getElementById("viewPointsBtn").addEventListener("click", () => {
 });
 
 document.getElementById("redeemPointsBtn").addEventListener("click", () => {
-  if (userPoints < 500) {
-    alert("⚠️ You need at least 500 points to redeem!");
+  if (userPoints < 50) {
+    alert("⚠️ You need at least 50 points to redeem!");
     return;
   }
-  userPoints -= 500;
+  userPoints -= 50;
   localStorage.setItem("loyaltyPoints", userPoints);
-  alert("🎉 You redeemed 500 points for a KSh 50 discount!");
+  alert("🎉 You redeemed 50 points for a KSh 50 discount!");
   updatePointsInfo();
 });
 
@@ -356,7 +356,7 @@ placeOrderBtn.addEventListener("click", async () => {
   alert("✅ Order submitted!");
 
   // 🎯 ADD LOYALTY POINTS HERE
-  const earnedPoints = Math.floor(totalValue / 500); // 1 point per 100 KSh
+  const earnedPoints = Math.floor(totalValue / 50); // 1 point per 100 KSh
   userPoints += earnedPoints;
   localStorage.setItem("loyaltyPoints", userPoints);
   alert(`🎁 You earned ${earnedPoints} points! You now have ${userPoints} total.`);
