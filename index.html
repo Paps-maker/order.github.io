@@ -339,7 +339,7 @@ placeOrderBtn.addEventListener("click", async () => {
 
   const orderCode = "ORD-" + Date.now();
   const totalValue = cart.reduce((s, i) => s + i.price * i.qty, 0) + (deliveryMethod.value === "delivery" ? 40 : 0);
-  const totalValue = cart.reduce((s, i) => s + i.price * i.qty, 0) + (deliveryMethod.value === "delivery" ? 70 : 0);
+  
   const orderData = {
     code: orderCode,
     items: cart,
