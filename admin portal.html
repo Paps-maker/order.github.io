@@ -193,6 +193,8 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
   <h3>Products</h3>
   <div id="productList"></div>
 </div>
+<!-- Notification Sound -->
+<audio id="newOrderSound" src="neworder.mp3" preload="auto"></audio>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -319,36 +321,145 @@ async function deleteProduct(id) {
 }
 
 // --- ORDERS ---
+let previousPendingOrders = 0;
+const orderSound = new Audio("neworder.mp3");
+orderSound.loop = true;
+
+// Create popup dynamically
+const popup = document.createElement("div");
+popup.id = "orderAlertPopup";
+popup.style.position = "fixed";
+popup.style.top = "50%";
+popup.style.left = "50%";
+popup.style.transform = "translate(-50%, -50%)"; // center
+popup.style.width = "300px";
+popup.style.minHeight = "200px";
+popup.style.background = "#ff4d4d";
+popup.style.color = "#fff";
+popup.style.padding = "20px";
+popup.style.borderRadius = "12px";
+popup.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
+popup.style.display = "none";
+popup.style.zIndex = "9999";
+popup.style.fontWeight = "600";
+popup.style.display = "flex";
+popup.style.flexDirection = "column";
+popup.style.justifyContent = "center";
+popup.style.alignItems = "center";
+popup.style.textAlign = "center";
+popup.style.gap = "12px";
+
+// Add popup content
+popup.innerHTML = `
+  <span id="blinkText" style="font-size:18px; animation: blink 1s infinite;">🔔 New Orders Received!</span>
+  <div id="ordersListPopup" style="text-align:left; max-height:120px; overflow:auto; width:100%;"></div>
+  <button id="markAsReadBtn" style="
+    background:#fff;
+    color:#ff4d4d;
+    border:none;
+    border-radius:8px;
+    padding:8px 14px;
+    font-weight:600;
+    cursor:pointer;">Mark as Read</button>
+`;
+
+// Add blink animation CSS dynamically
+const style = document.createElement("style");
+style.innerHTML = `
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+`;
+document.head.appendChild(style);
+document.body.appendChild(popup);
+
+// Mark as read
+popup.querySelector("#markAsReadBtn").addEventListener("click", () => {
+  orderSound.pause();
+  orderSound.currentTime = 0;
+  popup.style.display = "none";
+});
+
+// Unlock sound on first click (browser policy)
+document.addEventListener("click", () => {
+  orderSound.play().then(() => {
+    orderSound.pause();
+    orderSound.currentTime = 0;
+  }).catch(err => console.warn("Sound blocked until user interaction:", err));
+}, { once: true });
+
+// Load orders and attach button handlers
 function loadOrders() {
   const list = document.getElementById("ordersList");
-  if(!list) return;
-  onSnapshot(collection(db,"orders"), snapshot => {
+  if (!list) return;
+
+  onSnapshot(collection(db, "orders"), snapshot => {
+    let pendingCount = 0;
+    let newOrders = [];
     list.innerHTML = "";
+
     snapshot.forEach(docSnap => {
       const o = docSnap.data();
-      const itemsStr = (o.items||[]).map(i=>i.title).join(", ");
-      const qtyStr = (o.items||[]).map(i=>i.qty).join(", ");
+      const orderTime = o.timestamp?.toDate?.() || new Date();
+
+      if (o.status === "Pending") {
+        pendingCount++;
+        newOrders.push(`${o.customer?.name || 'N/A'} - ${orderTime.toLocaleTimeString()}`);
+      }
+
+      // Render main table
+      const itemsStr = (o.items || []).map(i => i.title).join(", ");
+      const qtyStr = (o.items || []).map(i => i.qty).join(", ");
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${o.customer?.name||'N/A'}</td>
-        <td>${o.customer?.phone||'N/A'}</td>
-        <td>${o.customer?.delivery||'Pickup'}</td>
-        <td>${o.customer?.address||'-'}</td>
+        <td>${o.customer?.name || 'N/A'}</td>
+        <td>${o.customer?.phone || 'N/A'}</td>
+        <td>${o.customer?.delivery || 'Pickup'}</td>
+        <td>${o.customer?.address || '-'}</td>
         <td>${itemsStr}</td>
         <td>${qtyStr}</td>
         <td>KSh ${o.total}</td>
-        <td>${o.paymentMethod||'N/A'}</td>
-        <td id="status-${docSnap.id}">${o.status||'Pending'}</td>
-        <td>${o.status==='Pending'?`<button class="completeBtn">Complete</button><button class="cancelBtn">Cancel</button>`:''} <button class="deleteOrderBtn">Delete</button></td>`;
-      if(o.status==='Pending'){
-        tr.querySelector(".completeBtn")?.addEventListener("click",()=> updateDoc(doc(db,"orders",docSnap.id),{status:"Completed"}));
-        tr.querySelector(".cancelBtn")?.addEventListener("click",()=> updateDoc(doc(db,"orders",docSnap.id),{status:"Cancelled"}));
-      }
-      tr.querySelector(".deleteOrderBtn").addEventListener("click",()=> deleteDoc(doc(db,"orders",docSnap.id)));
+        <td>${o.paymentMethod || 'N/A'}</td>
+        <td id="status-${docSnap.id}">${o.status || 'Pending'}</td>
+        <td>
+          ${o.status === 'Pending' ? `<button class="completeBtn">Complete</button><button class="cancelBtn">Cancel</button>` : ''}
+          <button class="deleteOrderBtn">Delete</button>
+        </td>`;
       list.appendChild(tr);
+
+      // Attach button handlers after appending
+      tr.querySelector(".completeBtn")?.addEventListener("click", () =>
+        updateDoc(doc(db, "orders", docSnap.id), { status: "Completed" })
+      );
+      tr.querySelector(".cancelBtn")?.addEventListener("click", () =>
+        updateDoc(doc(db, "orders", docSnap.id), { status: "Cancelled" })
+      );
+      tr.querySelector(".deleteOrderBtn")?.addEventListener("click", () =>
+        deleteDoc(doc(db, "orders", docSnap.id))
+      );
     });
+
+    // Show popup if new pending orders
+    if (pendingCount > previousPendingOrders && newOrders.length) {
+      orderSound.play().catch(() => console.warn("Autoplay blocked"));
+      const ordersDiv = popup.querySelector("#ordersListPopup");
+      ordersDiv.innerHTML = newOrders.map(o => `<div>${o}</div>`).join("");
+      popup.style.display = "flex";
+    }
+
+    // Stop sound if no pending orders
+    if (pendingCount === 0) {
+      orderSound.pause();
+      orderSound.currentTime = 0;
+      popup.style.display = "none";
+    }
+
+    previousPendingOrders = pendingCount;
   });
 }
+
 
 // --- CART ---
 function addToCart(product){
