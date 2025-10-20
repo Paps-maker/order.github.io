@@ -77,7 +77,7 @@ input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:
   <button id="viewPointsBtn" class="bottom-0 position-fixed shadow m-3 px-3 py-2 rounded-pill btn-outline-warning btn end-0">
     🎯 My Points
   </button>
-
+ 
 <!-- ✅ Floating SipDrip AI Assistant -->
 <button id="sipdripAIButton"
   style="position:fixed; bottom:20px; right:20px; background:#FFA94D;
@@ -88,7 +88,7 @@ input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:
 <!-- ✅ Chat Window -->
 <div id="sipdripChat"
      style="display:none; position:fixed; bottom:90px; right:20px; width:340px;
-            height:470px; background:#fff; border-radius:12px; overflow:hidden;
+            height:300px; background:#fff; border-radius:12px; overflow:hidden;
             box-shadow:0 8px 20px rgba(0,0,0,0.3); z-index:9999;
             display:flex; flex-direction:column; font-family:Arial, sans-serif;">
   <div style="background:#FFA94D; color:#fff; padding:10px; font-weight:700;
@@ -268,8 +268,6 @@ aiUserInput.addEventListener('keypress', e => {
 
 
 </div>
-
-<div class="products" id="productsGrid"></div>
 <!-- 📞 Floating Call Button Above AI -->
 <button id="callUsBtn" onclick="window.location.href='tel:+254717436668'"
   style="
@@ -296,6 +294,10 @@ aiUserInput.addEventListener('keypress', e => {
   transform:translateY(-3px);
 }
 </style>
+
+
+<div class="products" id="productsGrid"></div>
+
 <!-- Cart Modal -->
 <div id="orderModal">
 <div class="modal-content">
@@ -325,7 +327,7 @@ aiUserInput.addEventListener('keypress', e => {
     <select id="deliveryMethod">
       <option value="pickup">Pickup (No Fee)</option>
       <option value="delivery">Delivery (+KSh 40 Around Bara c & school)</option>
-      <option value="delivery">Delivery (+KSh 70 Towards Chemundu)</option>
+      <option value="70">Delivery (+KSh 70 Towards Chemundu)</option>
     </select>
     <div id="deliveryAddressContainer" style="display:none;">
       <label>Delivery Address</label>
@@ -410,58 +412,140 @@ const db = getFirestore(app);
 
 let cart=[], favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
 let allProducts=[];
+// --- Elements ---
+const productsGrid = document.getElementById("productsGrid");
+const cartCount = document.getElementById("cartCount");
+const viewCartBtn = document.getElementById("viewCartBtn");
+const orderModal = document.getElementById("orderModal");
+const orderTableBody = document.querySelector("#orderTable tbody");
+const orderTotal = document.getElementById("orderTotal");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const proceedCheckoutBtn = document.getElementById("proceedCheckoutBtn");
 
-const productsGrid=document.getElementById("productsGrid");
-const cartCount=document.getElementById("cartCount");
-const viewCartBtn=document.getElementById("viewCartBtn");
-const orderModal=document.getElementById("orderModal");
-const orderTableBody=document.querySelector("#orderTable tbody");
-const orderTotal=document.getElementById("orderTotal");
-const closeModalBtn=document.getElementById("closeModalBtn");
-const proceedCheckoutBtn=document.getElementById("proceedCheckoutBtn");
+const checkoutModal = document.getElementById("checkoutModal");
+const customerName = document.getElementById("customerName");
+const customerPhone = document.getElementById("customerPhone");
+const deliveryMethod = document.getElementById("deliveryMethod");
+const deliveryAddressContainer = document.getElementById("deliveryAddressContainer");
+const deliveryAddress = document.getElementById("deliveryAddress");
+const checkoutTotal = document.getElementById("checkoutTotal");
+const orderNotes = document.getElementById("orderNotes");
+const placeOrderBtn = document.getElementById("placeOrderBtn");
+const closeCheckoutBtn = document.getElementById("closeCheckoutBtn");
 
-const checkoutModal=document.getElementById("checkoutModal");
-const customerName=document.getElementById("customerName");
-const customerPhone=document.getElementById("customerPhone");
-const deliveryMethod=document.getElementById("deliveryMethod");
-const deliveryAddressContainer=document.getElementById("deliveryAddressContainer");
-const deliveryAddress=document.getElementById("deliveryAddress");
-const checkoutTotal=document.getElementById("checkoutTotal");
-const orderNotes=document.getElementById("orderNotes");
-const placeOrderBtn=document.getElementById("placeOrderBtn");
-const closeCheckoutBtn=document.getElementById("closeCheckoutBtn");
+// --- Cart Functions ---
+function updateCartCount() {
+  cartCount.textContent = cart.length;
+}
 
-const viewFavoritesBtn=document.getElementById("viewFavoritesBtn");
-const favoritesModal=document.getElementById("favoritesModal");
-const favoritesBody=document.getElementById("favoritesBody");
+function getDeliveryCharge() {
+  switch (deliveryMethod.value) {
+    case "delivery40": return 40;
+    case "delivery70": return 70;
+    default: return 0; // pickup
+  }
+}
 
-const viewOrdersBtn=document.getElementById("viewOrdersBtn");
-const myOrdersModal=document.getElementById("myOrdersModal");
-const myOrdersBody=document.getElementById("myOrdersBody");
+function renderCart() {
+  orderTableBody.innerHTML = "";
+  let total = 0;
 
-const searchInput = document.getElementById("searchInput");
-const categoryFilter = document.getElementById("categoryFilter");
-
-// -- Cart Functions --
-function updateCartCount(){ cartCount.textContent=cart.length; }
-function renderCart(){
-  orderTableBody.innerHTML="";
-  let total=0;
-  cart.forEach((item,index)=>{
-    total+=item.price*item.qty;
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${item.title}</td>
-      <td><div class="qty-edit"><button onclick="decreaseQty(${index})">-</button><span>${item.qty}</span><button onclick="increaseQty(${index})">+</button></div></td>
-      <td>KSh ${(item.price*item.qty).toFixed(2)}</td>
-      <td><button style="background:var(--danger);color:#fff;padding:2px 6px;border:none;border-radius:4px;cursor:pointer;" onclick="removeItem(${index})">X</button></td>`;
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.title}</td>
+      <td>
+        <div class="qty-edit">
+          <button onclick="decreaseQty(${index})">-</button>
+          <span>${item.qty}</span>
+          <button onclick="increaseQty(${index})">+</button>
+        </div>
+      </td>
+      <td>KSh ${(item.price * item.qty).toFixed(2)}</td>
+      <td>
+        <button style="background:var(--danger);color:#fff;padding:2px 6px;border:none;border-radius:4px;cursor:pointer;" onclick="removeItem(${index})">X</button>
+      </td>`;
     orderTableBody.appendChild(tr);
   });
-  orderTotal.textContent=total.toFixed(2);
+
+  const deliveryCharge = getDeliveryCharge();
+  const totalWithDelivery = total + deliveryCharge;
+
+  orderTotal.textContent = totalWithDelivery.toFixed(2);
+  checkoutTotal.textContent = totalWithDelivery.toFixed(2); // update checkout total
   updateCartCount();
 }
-window.increaseQty=i=>{ cart[i].qty++; renderCart(); }
-window.decreaseQty=i=>{ if(cart[i].qty>1){cart[i].qty--; renderCart();} }
-window.removeItem=i=>{ cart.splice(i,1); renderCart(); }
+
+window.increaseQty = i => { cart[i].qty++; renderCart(); };
+window.decreaseQty = i => { if (cart[i].qty > 1) { cart[i].qty--; renderCart(); } };
+window.removeItem = i => { cart.splice(i, 1); renderCart(); };
+
+// --- Delivery Method Toggle ---
+deliveryMethod.addEventListener("change", () => {
+  deliveryAddressContainer.style.display = deliveryMethod.value.startsWith("delivery") ? "block" : "none";
+  renderCart(); // update total whenever delivery changes
+});
+
+// --- Close Checkout Modal ---
+closeCheckoutBtn.addEventListener("click", () => {
+  checkoutModal.style.display = "none";
+});
+
+// --- Add WhatsApp Button ---
+let placeOrderWhatsappBtn = document.createElement("button");
+placeOrderWhatsappBtn.id = "placeOrderWhatsappBtn";
+placeOrderWhatsappBtn.textContent = "Place Order via WhatsApp";
+placeOrderWhatsappBtn.style.background = "#25D366";
+placeOrderWhatsappBtn.style.color = "#fff";
+placeOrderWhatsappBtn.style.marginLeft = "8px";
+placeOrderWhatsappBtn.style.padding = "8px 14px";
+placeOrderWhatsappBtn.style.border = "none";
+placeOrderWhatsappBtn.style.borderRadius = "6px";
+placeOrderWhatsappBtn.style.cursor = "pointer";
+
+placeOrderBtn.parentNode.insertBefore(placeOrderWhatsappBtn, placeOrderBtn.nextSibling);
+
+// --- WhatsApp Order Logic ---
+placeOrderWhatsappBtn.addEventListener("click", () => {
+  const name = customerName.value.trim();
+  const phone = customerPhone.value.trim();
+  const method = deliveryMethod.value;
+  const address = deliveryAddress.value.trim();
+  const notes = orderNotes.value.trim();
+  const total = checkoutTotal.textContent;
+  const deliveryCharge = getDeliveryCharge();
+
+  if (!name || !phone || cart.length === 0) {
+    alert("Please enter your name, phone, and have at least one item in the cart.");
+    return;
+  }
+
+  // Build professional WhatsApp message
+  let message = `🛒 *New Order Received*\n`;
+  message += `*Customer:* ${name}\n`;
+  message += `*Phone:* ${phone}\n`;
+  message += `*Delivery Method:* ${method}${address ? `\n*Address:* ${address}` : ''}\n`;
+  message += `*Delivery Charge:* KSh ${deliveryCharge}\n`;
+  if (notes) message += `*Notes:* ${notes}\n`;
+  message += `\n*Order Details:*\n`;
+
+  cart.forEach(item => {
+    message += `• ${item.title} x${item.qty} - KSh ${(item.price * item.qty).toFixed(2)}\n`;
+  });
+
+  message += `\n*Total:* KSh ${total}\n`;
+  message += `\nThank you for your order!`;
+
+  const businessNumber = "254790427109"; // replace with your WhatsApp number
+  const whatsappURL = `https://wa.me/${businessNumber}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappURL, "_blank");
+
+  // Close modal and reset cart
+  checkoutModal.style.display = "none";
+  cart = [];
+  renderCart();
+});
 
 // --- LOYALTY POINTS SYSTEM ---
 let userPoints = parseInt(localStorage.getItem("loyaltyPoints") || "0");
