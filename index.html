@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,6 +77,201 @@ input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:
   <button id="viewPointsBtn" class="bottom-0 position-fixed shadow m-3 px-3 py-2 rounded-pill btn-outline-warning btn end-0">
     🎯 My Points
   </button>
+  <a href="tel:+254717436668" 
+   style="background:#ff4d4d;
+          color:#fff; padding:8px 14px; border-radius:30px;
+          font-weight:600; text-decoration:none; margin-left:10px;">
+  📞 Call Us
+</a>
+<!-- ✅ Floating SipDrip AI Assistant -->
+<button id="sipdripAIButton"
+  style="position:fixed; bottom:20px; right:20px; background:#FFA94D;
+         color:#fff; border:none; border-radius:50%; width:60px; height:60px;
+         font-size:24px; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,0.3);
+         z-index:9999;">🤖</button>
+
+<!-- ✅ Chat Window -->
+<div id="sipdripChat"
+     style="display:none; position:fixed; bottom:90px; right:20px; width:340px;
+            height:470px; background:#fff; border-radius:12px; overflow:hidden;
+            box-shadow:0 8px 20px rgba(0,0,0,0.3); z-index:9999;
+            display:flex; flex-direction:column; font-family:Arial, sans-serif;">
+  <div style="background:#FFA94D; color:#fff; padding:10px; font-weight:700;
+              display:flex; justify-content:space-between; align-items:center;">
+    <span>🍧 SipDrip AI Assistant</span>
+    <button id="closeAIChat"
+            style="background:none; border:none; color:#fff;
+                   font-size:18px; cursor:pointer;">✖</button>
+  </div>
+
+  <div id="aiChatContent"
+       style="flex:1; padding:10px; overflow-y:auto; background:#f9f9f9;"></div>
+
+  <div style="display:flex; border-top:1px solid #ddd;">
+    <input id="aiUserInput" type="text" placeholder="Ask me anything..."
+           style="flex:1; border:none; padding:10px; outline:none;">
+    <button id="aiSendBtn"
+            style="background:#FFA94D; border:none; color:#fff;
+                   padding:0 16px; cursor:pointer;">Send</button>
+  </div>
+</div>
+
+<script>
+// --- Selectors ---
+const aiBtn = document.getElementById('sipdripAIButton');
+const aiChat = document.getElementById('sipdripChat');
+const closeAIChat = document.getElementById('closeAIChat');
+const aiSendBtn = document.getElementById('aiSendBtn');
+const aiUserInput = document.getElementById('aiUserInput');
+const aiChatContent = document.getElementById('aiChatContent');
+
+// --- Toggle Chat ---
+aiBtn.onclick = () => aiChat.style.display = 'flex';
+closeAIChat.onclick = () => aiChat.style.display = 'none';
+
+// --- Add Message Helper ---
+function addAIMessage(text, sender = 'bot', img = null) {
+  const msg = document.createElement('div');
+  msg.style.margin = '10px 0';
+  msg.style.display = 'flex';
+  msg.style.flexDirection = sender === 'user' ? 'row-reverse' : 'row';
+  msg.innerHTML = `
+    <div style="background:${sender === 'user' ? '#FFA94D' : '#eee'};
+                color:${sender === 'user' ? '#fff' : '#333'};
+                padding:8px 12px; border-radius:10px; max-width:80%;">
+      ${text}
+      ${img ? `<br><img src="${img}" style="margin-top:8px; border-radius:8px; width:100%; max-width:220px;">` : ''}
+    </div>
+  `;
+  aiChatContent.appendChild(msg);
+  aiChatContent.scrollTop = aiChatContent.scrollHeight;
+}
+
+// --- Menu Data ---
+const menu = {
+  icecream: [
+    { name: "Mango Ice Cream", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759774914903_mango.jpg?alt=media&token=7b97e539-929c-42c3-8c12-77a88ae68f13" },
+    { name: "Vanilla Pistachio", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759665255984_pist.jpg?alt=media&token=2caae2d0-304c-44f7-bcf1-ed2282c8e80d" },
+    { name: "Vanilla BlueBerry", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759500370487_blue.jpg?alt=media&token=dd404255-5420-49a4-883c-e28b0dd1da62" },
+    { name: "Vanilla Chocolate", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759500566899_cho.jpg?alt=media&token=03b8dae6-1c44-49b7-89b7-6df72356572f" },
+    { name: "Vanilla Strawberry per scoop", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759500009215_ice7.jpg?alt=media&token=b79c9490-867e-44b1-b259-0eaa12054e91" },
+    { name: "Vanilla Plain", price: "KSh 50", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759665410212_vanill.jpg?alt=media&token=45ba9fb8-d56b-4c47-9e93-f18b1b5ca3f9" }
+  ],
+  milkshake: [
+    { name: "Milk Shake Vanilla Oreo", price: "KSh 180", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759686925756_ice3.jpg?alt=media&token=da9409a6-409d-4167-816f-59fea4698f7a" },
+    { name: "Milk Shake Strawberry", price: "KSh 150", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759686997538_strawb.jpg?alt=media&token=34925522-2aad-4dae-b2b1-6a31f0bb5926" },
+    { name: "Milk Shake Blueberry", price: "KSh 150", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759687161438_Blueberry.jpg?alt=media&token=d50bc6ae-8645-47b2-804e-8addca8ef1bb" },
+    { name: "Milk Shake Chocolate", price: "KSh 150", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759687102324_chmilk.jpg?alt=media&token=05c6350e-6907-4931-820d-d189afad8047" }
+  ],
+  coffee: [
+    { name: "White Coffee", price: "KSh 100", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759931555916_21667-easy-iced-coffee-ddmfs-4x3-0093-7becf3932bd64ed7b594d46c02d0889f.jpg?alt=media&token=b893e54d-fb47-4375-8032-4174ba66a05f" },
+    { name: "Coffee", price: "KSh 60", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759665333355_coffee2.jpg?alt=media&token=27e477c0-f2f3-408e-89ca-b87da5f4afd6" }
+  ],
+  snacks: [
+    { name: "Hot Dog", price: "KSh 130", img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2F1759847327273_hot%20dog2.jpg?alt=media&token=2e730134-f7c1-4bc1-a525-5c45b01d970a" }
+  ]
+};
+
+// --- AI Logic ---
+function getAIResponse(input) {
+  input = input.toLowerCase();
+
+  if (/(hello|hi|hey|good morning|good afternoon)/.test(input))
+    return { text: "Hey there 👋! Welcome to SipDrip — home of tasty milkshakes, ice cream, coffee, and snacks! What would you like to try today? 🍦☕" };
+
+  if (input.includes('menu') || input.includes('products') || input.includes('price'))
+    return { text: showMenu(menu) };
+
+  if (input.includes('ice cream') || input.includes('flavor'))
+    return { text: showMenu({ icecream: menu.icecream }) };
+
+  if (input.includes('milkshake') || input.includes('shake'))
+    return { text: showMenu({ milkshake: menu.milkshake }) };
+
+  if (input.includes('coffee'))
+    return { text: showMenu({ coffee: menu.coffee }) };
+
+  if (input.includes('hot dog') || input.includes('snack'))
+    return { text: showMenu({ snacks: menu.snacks }) };
+
+  if (input.includes('best') || input.includes('recommend'))
+    return { text: "Our top sellers are the 🥤 <b>Vanilla Oreo Milkshake</b> and 🍦 <b>Mango Ice Cream</b> — customers absolutely love them! 😍" };
+
+  if (input.includes('deliver') || input.includes('delivery'))
+    return { text: "🚗 Yes, we deliver around Eldoret! Just place your order at sipdrip.online and we’ll bring it right to your door." };
+
+  if (input.includes('payment') || input.includes('mpesa') || input.includes('pay'))
+    return { text: "💳 We accept M-PESA, cash on delivery, or bank transfer  whichever you prefer." };
+
+  if (input.includes('where') || input.includes('located') || input.includes('location'))
+    return { text: " We’re located at <b>Bara c, Varch </b> up stairs." };
+
+  if (input.includes('open') || input.includes('time') || input.includes('hours'))
+    return { text: "🕒 We’re open daily from 8:00 AM to 10:00 PM. Come visit us anytime!" };
+
+  if (input.includes('contact') || input.includes('phone') || input.includes('number'))
+    return { text: "📞 You can reach us at <b>+254 719 240 049</b>." };
+
+  if (input.includes('offer') || input.includes('discount'))
+    return { text: "🎉 Special today: Get 10% off all Milkshakes! Try our Vanilla Oreo flavor while it lasts." };
+
+  // 🧠 NEW: How to Order FAQ
+  if (input.includes('how to order') || input.includes('place order') || input.includes('order process')) {
+    return { 
+      text: `
+        🛒 <b>How to Order from SipDrip:</b><br>
+        1️⃣ Browse our menu and click <b>"Add to Cart"</b> on your favorite items.<br>
+        2️⃣ Click the <b>Cart</b> icon to review your order.<br>
+        3️⃣ Fill in your <b>Name</b>, <b>Phone</b>, and <b>Address</b> (if for delivery).<br>
+        4️⃣ Choose <b>Delivery</b> or <b>Pickup</b> and add any notes.<br>
+        5️⃣ Click <b>Place Order</b> ✅ — You’ll get an instant confirmation and a downloadable PDF receipt!<br>
+        <br>🎁 Earn loyalty points every time you order!
+      `,
+      img: "https://firebasestorage.googleapis.com/v0/b/moviedrift-fcc93.firebasestorage.app/o/products%2Forder-guide.jpg?alt=media&token=example"
+    };
+  }
+
+  if (input.includes('thank'))
+    return { text: "You're welcome 😊! Can I suggest a refreshing shake today?" };
+
+  return { text: "🤖 I can help you with our menu, prices, flavors, and how to order. Try asking 'How do I place an order?' 🍨" };
+}
+
+// --- Menu Renderer ---
+function showMenu(categories) {
+  let html = '';
+  for (const [cat, items] of Object.entries(categories)) {
+    html += `<b>${cat.charAt(0).toUpperCase() + cat.slice(1)}:</b><br>`;
+    items.forEach(i => {
+      html += `
+        <div style="margin:8px 0; display:flex; align-items:center; gap:10px;">
+          <img src="${i.img}" alt="${i.name}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
+          <div><b>${i.name}</b><br><span>${i.price}</span></div>
+        </div>`;
+    });
+  }
+  return html;
+}
+
+// --- Send Message ---
+function sendAIMessage() {
+  const text = aiUserInput.value.trim();
+  if (!text) return;
+  addAIMessage(text, 'user');
+  aiUserInput.value = '';
+  setTimeout(() => {
+    const { text: responseText, img: responseImg } = getAIResponse(text);
+    addAIMessage(responseText, 'bot', responseImg);
+  }, 600);
+}
+
+aiSendBtn.onclick = sendAIMessage;
+aiUserInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') sendAIMessage();
+});
+</script>
+
+
 </div>
 
 <div class="products" id="productsGrid"></div>
@@ -521,5 +717,228 @@ function filterProducts(){
   renderProducts(filtered);
 }
 </script>
+<!-- Paste this inside your existing <script type="module"> (after allProducts is available) -->
+<script>
+// --- SIPDRIP AI: Smart Order Detection (paste into your module script) ---
+
+// helpers: map word-numbers to digits
+const WORD_NUMBERS = {
+  'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10
+};
+
+// Select AI chat elements (they are present in your HTML)
+const aiBtn = document.getElementById('sipdripAIButton');
+
+const closeAIChat = document.getElementById('closeAIChat');
+const aiSendBtn = document.getElementById('aiSendBtn');
+
+
+
+if (aiBtn && aiChat && aiSendBtn && aiUserInput && aiChatContent) {
+  // toggle
+  aiBtn.addEventListener('click', ()=> aiChat.style.display = 'flex');
+  closeAIChat.addEventListener('click', ()=> aiChat.style.display = 'none');
+
+  // Append a chat message into the chat window
+  function addAIMessage(text, sender = 'bot', img = null) {
+    const msg = document.createElement('div');
+    msg.style.margin = '10px 0';
+    msg.style.display = 'flex';
+    msg.style.flexDirection = sender === 'user' ? 'row-reverse' : 'row';
+    msg.innerHTML = `
+      <div style="background:${sender === 'user' ? '#FFA94D' : '#eee'};
+                  color:${sender === 'user' ? '#fff' : '#333'};
+                  padding:8px 12px; border-radius:10px; max-width:80%;">
+        ${text}
+        ${img ? `<br><img src="${img}" style="margin-top:8px; border-radius:8px; width:100%; max-width:260px;">` : ''}
+      </div>
+    `;
+    aiChatContent.appendChild(msg);
+    aiChatContent.scrollTop = aiChatContent.scrollHeight;
+  }
+
+  // Very small fuzzy matcher: returns product with highest score (title contains tokens)
+  function findBestProductMatch(query) {
+    if (!allProducts || !allProducts.length) return null;
+    const q = query.toLowerCase();
+    // Try exact substring first
+    let exact = allProducts.find(p => p.title.toLowerCase() === q);
+    if (exact) return exact;
+    // token matching
+    const tokens = q.split(/\s+/).filter(Boolean);
+    let best = null;
+    let bestScore = 0;
+    allProducts.forEach(p => {
+      const title = (p.title || '').toLowerCase();
+      let score = 0;
+      tokens.forEach(t => {
+        if (title.includes(t)) score += 2;               // token found
+        if (title.startsWith(t)) score += 1;             // prefix bonus
+      });
+      // also boost if category or short token matches (e.g., "shake", "ice", "mango")
+      if (score > bestScore) { best = p; bestScore = score; }
+    });
+    // require at least 2 points to avoid accidental false positives (tweak if needed)
+    return bestScore >= 2 ? best : null;
+  }
+
+  // parse quantity: finds numeric digits or word numbers (one..ten)
+  function extractQuantity(text) {
+    // look for digits first
+    const digitMatch = text.match(/(\d+)\s*(x|pcs|pieces|s)?/i);
+    if (digitMatch) return parseInt(digitMatch[1], 10);
+    // look for word numbers
+    for (const [word, val] of Object.entries(WORD_NUMBERS)) {
+      const regex = new RegExp(`\\b${word}\\b`, 'i');
+      if (regex.test(text)) return val;
+    }
+    // if text contains 'a ' or 'an ' before item -> 1
+    if (/\b(a|an)\b\s+\w+/i.test(text)) return 1;
+    return null; // unknown
+  }
+
+  // entry point: process user message for order intent
+  function processAIInput(text) {
+    const lower = text.toLowerCase();
+    // quick checks for order intent keywords
+    const orderKeywords = ['order','i want','i\'d like','add','get','can i have','can i get','buy','please'];
+    const isOrderIntent = orderKeywords.some(k => lower.includes(k)) && 
+                         (lower.includes('ice') || lower.includes('shake') || lower.includes('milk') || lower.includes('hot dog') || lower.includes('coffee') || lower.includes('ice cream') || allProducts.some(p => lower.includes(p.title.toLowerCase().split(' ')[0])));
+    if (!isOrderIntent) return null;
+
+    // try to extract quantity
+    let qty = extractQuantity(text);
+
+    // try to find product phrase: attempt using whole text, then removing qty words and order words
+    // remove common order words to improve matching
+    let cleaned = text.replace(/\b(order|please|i want|i'd like|can i have|can i get|add|buy|get|one|two|three|four|five|six|seven|eight|nine|ten|a|an|please|pcs|pieces|x)\b/ig, '').trim();
+
+    // Try several matching strategies
+    const attempts = [
+      cleaned,
+      text, // raw
+      lower.replace(/\b(order|please|i want|i'd like|can i have|can i get|add|buy|get|please)\b/ig,'').trim(),
+      // try single tokens
+    ];
+
+    let found = null;
+    for (const attempt of attempts) {
+      if (!attempt) continue;
+      found = findBestProductMatch(attempt);
+      if (found) break;
+    }
+
+    // fallback: search for each product's first word presence
+    if (!found) {
+      for (const p of allProducts) {
+        const first = (p.title||'').split(' ')[0].toLowerCase();
+        if (first && lower.includes(first)) { found = p; break; }
+      }
+    }
+
+    if (!found) return null;
+
+    // if qty not found, default to 1
+    if (!qty) qty = 1;
+
+    return { product: found, qty };
+  }
+
+  // Add to cart and reply in chat
+  function addProductToCartAndConfirm(product, qty) {
+    // Use same cart item shape as your existing code
+    const existing = cart.find(c => c.id === product.id || c.title === product.title);
+    if (existing) {
+      existing.qty = (existing.qty || 1) + qty;
+    } else {
+      // push minimal fields used by renderCart
+      cart.push({
+        id: product.id || product.title,
+        title: product.title || product.name,
+        price: Number(product.price || product.price || 0),
+        qty: qty,
+        image: product.image || product.img || product.imageUrl || product.imgUrl || ''
+      });
+    }
+    // persist if you want (site already uses localStorage for favorites; adapt as needed)
+    // localStorage.setItem('cart', JSON.stringify(cart));
+    renderCart(); // update cart modal UI (uses your existing renderCart)
+
+    // Chat confirmation card
+    const lineTotal = (Number(product.price || product.price || 0) * qty).toFixed(2);
+    const msgHtml = `
+      ✅ <b>Added to cart:</b><br>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
+        <img src="${product.image || product.img || ''}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;">
+        <div>
+          <div style="font-weight:700;">${product.title || product.name}</div>
+          <div>${qty} × KSh ${product.price} = KSh ${lineTotal}</div>
+          <div style="margin-top:6px;">
+            <button id="aiCheckoutBtn" style="background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">Checkout</button>
+            <button id="aiKeepBtn" style="background:#ffd633;color:#333;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;margin-left:6px;">Keep browsing</button>
+          </div>
+        </div>
+      </div>
+    `;
+    addAIMessage(msgHtml, 'bot', null);
+
+    // Hook up the buttons (they'll exist after next event loop tick)
+    setTimeout(()=>{
+      const checkoutBtn = document.getElementById('aiCheckoutBtn');
+      const keepBtn = document.getElementById('aiKeepBtn');
+      if (checkoutBtn) checkoutBtn.addEventListener('click', () => {
+        // open checkout modal and populate total
+        checkoutModal.style.display = 'flex';
+        checkoutTotal.textContent = cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
+      });
+      if (keepBtn) keepBtn.addEventListener('click', () => {
+        addAIMessage("Great — keep browsing! Ask me to add anything else 😊", 'bot');
+      });
+    }, 100);
+  }
+
+  // main send handler for AI chat (wraps existing sendAIMessage)
+  async function handleAISend() {
+    const text = aiUserInput.value.trim();
+    if (!text) return;
+    addAIMessage(text, 'user');
+    aiUserInput.value = '';
+
+    // small typing delay
+    setTimeout(() => {
+      // first, attempt smart order detection
+      const order = processAIInput(text);
+      if (order && order.product) {
+        addProductToCartAndConfirm(order.product, order.qty);
+        return;
+      }
+
+      // fallback to your existing getAIResponse (if you have one), else simple replies
+      // If you have getAIResponse in scope, use it:
+      if (typeof getAIResponse === 'function') {
+        const resp = getAIResponse(text);
+        // getAIResponse in your page returns {text, img} or {text}
+        if (resp) {
+          if (typeof resp === 'object') addAIMessage(resp.text || resp, 'bot', resp.img || null);
+          else addAIMessage(resp, 'bot');
+          return;
+        }
+      }
+
+      // generic fallback
+      addAIMessage("Sorry, I didn't understand. I can help add items to your cart — try 'I want a Mango Ice Cream' or '2 vanilla shakes'", 'bot');
+    }, 600);
+  }
+
+  // wire send button & enter key
+  aiSendBtn.addEventListener('click', handleAISend);
+  aiUserInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') handleAISend();
+  });
+} // end if elements exist
+
+// --- end of Smart Order Detection snippet ---
+</script>
+
 </body>
 </html>
