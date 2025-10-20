@@ -77,17 +77,7 @@ input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:
   <button id="viewPointsBtn" class="bottom-0 position-fixed shadow m-3 px-3 py-2 rounded-pill btn-outline-warning btn end-0">
     🎯 My Points
   </button>
-<button id="callUsBtn" onclick="window.location.href='tel:+254717436668'" 
-  style="background:#ff4d4d; 
-         color:#fff; 
-         border:none; 
-         border-radius:30px; 
-         padding:8px 14px; 
-         font-weight:600; 
-         cursor:pointer;
-         margin-left:10px;">
-  📞 Call Us
-</button>
+
 <!-- ✅ Floating SipDrip AI Assistant -->
 <button id="sipdripAIButton"
   style="position:fixed; bottom:20px; right:20px; background:#FFA94D;
@@ -280,7 +270,32 @@ aiUserInput.addEventListener('keypress', e => {
 </div>
 
 <div class="products" id="productsGrid"></div>
+<!-- 📞 Floating Call Button Above AI -->
+<button id="callUsBtn" onclick="window.location.href='tel:+254717436668'"
+  style="
+    position:fixed;
+    bottom:90px;        /* Adjust height so it's above the AI button */
+    left:20px;         /* Align with the AI icon */
+    background:#ff4d4d;
+    color:#fff;
+    border:none;
+    border-radius:30px;
+    padding:10px 16px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    z-index:9999;
+    transition:0.3s ease;">
+  📞 Call Us
+</button>
 
+<!-- Optional Hover Effect -->
+<style>
+#callUsBtn:hover {
+  background:#ff6666;
+  transform:translateY(-3px);
+}
+</style>
 <!-- Cart Modal -->
 <div id="orderModal">
 <div class="modal-content">
