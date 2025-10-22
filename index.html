@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +50,10 @@ header::after{content:"";background:url('https://images.unsplash.com/photo-15652
 .qty-edit button:hover{background:var(--accent);color:#fff;}
 input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:100%;margin-bottom:10px;}
 @media(max-width:480px){.modal-content{width:95%;}.modal-body table th,.modal-body table td{font-size:12px;padding:6px;}.product-card img{height:auto;object-fit:contain;}}
+/* small helper so the WhatsApp button next to Place Order looks good in modal footer */
+.modal-footer .whatsapp-btn{
+  background:#25D366;color:#fff;padding:8px 12px;border-radius:8px;border:none;margin-left:8px;cursor:pointer;font-weight:700;
+}
 </style>
 </head>
 <body>
@@ -74,10 +77,11 @@ input,select,textarea{padding:8px;border-radius:8px;border:1px solid #ddd;width:
   <button id="viewFavoritesBtn">⭐ Favorites</button>
   <button id="viewOrdersBtn">📦 My Orders</button>
   <!-- Loyalty Button -->
-  <button id="viewPointsBtn" class="bottom-0 position-fixed shadow m-3 px-3 py-2 rounded-pill btn-outline-warning btn end-0">
+  <button id="viewPointsBtn" style="background:#ffd633;color:#333;padding:8px 14px;border:none;border-radius:12px;font-weight:700;">
     🎯 My Points
   </button>
- 
+</div>
+
 <!-- ✅ Floating SipDrip AI Assistant -->
 <button id="sipdripAIButton"
   style="position:fixed; bottom:20px; right:20px; background:#FFA94D;
@@ -267,13 +271,12 @@ aiUserInput.addEventListener('keypress', e => {
 </script>
 
 
-</div>
-<!-- 📞 Floating Call Button Above AI -->
+<!-- Floating Call Button -->
 <button id="callUsBtn" onclick="window.location.href='tel:+254717436668'"
   style="
     position:fixed;
-    bottom:50px;        /* Adjust height so it's above the AI button */
-    left:20px;         /* Align with the AI icon */
+    bottom:50px;
+    left:20px;
     background:#ff4d4d;
     color:#fff;
     border:none;
@@ -287,14 +290,9 @@ aiUserInput.addEventListener('keypress', e => {
   📞 Call Us
 </button>
 
-<!-- Optional Hover Effect -->
 <style>
-#callUsBtn:hover {
-  background:#ff6666;
-  transform:translateY(-3px);
-}
+#callUsBtn:hover { background:#ff6666; transform:translateY(-3px); }
 </style>
-
 
 <div class="products" id="productsGrid"></div>
 
@@ -339,13 +337,11 @@ aiUserInput.addEventListener('keypress', e => {
   </div>
   <div class="modal-footer">
     <button id="placeOrderBtn">Place Order</button>
+    <!-- WhatsApp order button inserted by script for parity with Place Order -->
     <button id="closeCheckoutBtn" style="background:#6c757d;margin-left:8px;">Cancel</button>
   </div>
 </div>
-
-
 </div>
-
 
 <!-- Favorites Modal -->
 <div id="favoritesModal">
@@ -368,13 +364,8 @@ aiUserInput.addEventListener('keypress', e => {
   </div>
 </div>
 </div>
-<!-- ===== Loyalty Points Button (bottom-right floating) ===== -->
 
-
-<!-- ===== Loyalty Points Button (bottom-right floating) ===== -->
-
-
-<!-- ===== Loyalty Points Modal (Custom Style) ===== -->
+<!-- Loyalty Points Modal -->
 <div id="pointsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
 background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
   <div class="modal-content" style="background:#fff; border-radius:16px; overflow:hidden; width:90%; max-width:400px;">
@@ -393,12 +384,21 @@ background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:
   </div>
 </div>
 
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  addDoc,
+  query,
+  orderBy,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const { jsPDF } = window.jspdf;
 
+// Firebase config (kept as you provided)
 const firebaseConfig = {
   apiKey: "AIzaSyDFVoYWgoxpRBxi3l3OUarvUn2_M9_lqqY",
   authDomain: "moviedrift-fcc93.firebaseapp.com",
@@ -410,9 +410,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let cart=[], favorites=JSON.parse(localStorage.getItem("favorites")||"[]");
-let allProducts=[];
-// --- Elements ---
+/* Application state */
+let cart = [];
+let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+let allProducts = [];
+
+/* Elements*/
 const productsGrid = document.getElementById("productsGrid");
 const cartCount = document.getElementById("cartCount");
 const viewCartBtn = document.getElementById("viewCartBtn");
@@ -433,23 +436,25 @@ const orderNotes = document.getElementById("orderNotes");
 const placeOrderBtn = document.getElementById("placeOrderBtn");
 const closeCheckoutBtn = document.getElementById("closeCheckoutBtn");
 
-// --- Cart Functions ---
-function updateCartCount() {
-  cartCount.textContent = cart.length;
+const favoritesBody = document.getElementById("favoritesBody");
+const viewFavoritesBtn = document.getElementById("viewFavoritesBtn");
+const viewOrdersBtn = document.getElementById("viewOrdersBtn");
+
+const viewPointsBtn = document.getElementById("viewPointsBtn");
+let userPoints = parseInt(localStorage.getItem("loyaltyPoints") || "0");
+
+/* Helpers */
+function updateCartCount() { cartCount.textContent = cart.length; }
+function getDeliveryChargeVal() {
+  if (deliveryMethod.value === "delivery") return 40;
+  if (deliveryMethod.value === "70") return 70;
+  return 0;
 }
 
-function getDeliveryCharge() {
-  switch (deliveryMethod.value) {
-    case "delivery40": return 40;
-    case "delivery70": return 70;
-    default: return 0; // pickup
-  }
-}
-
+/* Render cart */
 function renderCart() {
   orderTableBody.innerHTML = "";
   let total = 0;
-
   cart.forEach((item, index) => {
     total += item.price * item.qty;
     const tr = document.createElement("tr");
@@ -468,169 +473,123 @@ function renderCart() {
       </td>`;
     orderTableBody.appendChild(tr);
   });
-
-  const deliveryCharge = getDeliveryCharge();
+  const deliveryCharge = getDeliveryChargeVal();
   const totalWithDelivery = total + deliveryCharge;
-
   orderTotal.textContent = totalWithDelivery.toFixed(2);
-  checkoutTotal.textContent = totalWithDelivery.toFixed(2); // update checkout total
+  checkoutTotal.textContent = totalWithDelivery.toFixed(2);
   updateCartCount();
 }
 
+/* Expose helpers to global for inline onclicks used in generated markup */
 window.increaseQty = i => { cart[i].qty++; renderCart(); };
 window.decreaseQty = i => { if (cart[i].qty > 1) { cart[i].qty--; renderCart(); } };
 window.removeItem = i => { cart.splice(i, 1); renderCart(); };
 
-// --- Delivery Method Toggle ---
+/* Delivery toggle */
 deliveryMethod.addEventListener("change", () => {
-  deliveryAddressContainer.style.display = deliveryMethod.value.startsWith("delivery") ? "block" : "none";
-  renderCart(); // update total whenever delivery changes
-});
-
-// --- Close Checkout Modal ---
-closeCheckoutBtn.addEventListener("click", () => {
-  checkoutModal.style.display = "none";
-});
-
-// --- Add WhatsApp Button ---
-let placeOrderWhatsappBtn = document.createElement("button");
-placeOrderWhatsappBtn.id = "placeOrderWhatsappBtn";
-placeOrderWhatsappBtn.textContent = "Place Order via WhatsApp";
-placeOrderWhatsappBtn.style.background = "#25D366";
-placeOrderWhatsappBtn.style.color = "#fff";
-placeOrderWhatsappBtn.style.marginLeft = "8px";
-placeOrderWhatsappBtn.style.padding = "8px 14px";
-placeOrderWhatsappBtn.style.border = "none";
-placeOrderWhatsappBtn.style.borderRadius = "6px";
-placeOrderWhatsappBtn.style.cursor = "pointer";
-
-placeOrderBtn.parentNode.insertBefore(placeOrderWhatsappBtn, placeOrderBtn.nextSibling);
-
-// --- WhatsApp Order Logic ---
-placeOrderWhatsappBtn.addEventListener("click", () => {
-  const name = customerName.value.trim();
-  const phone = customerPhone.value.trim();
-  const method = deliveryMethod.value;
-  const address = deliveryAddress.value.trim();
-  const notes = orderNotes.value.trim();
-  const total = checkoutTotal.textContent;
-  const deliveryCharge = getDeliveryCharge();
-
-  if (!name || !phone || cart.length === 0) {
-    alert("Please enter your name, phone, and have at least one item in the cart.");
-    return;
-  }
-
-  // Build professional WhatsApp message
-  let message = `🛒 *New Order Received*\n`;
-  message += `*Customer:* ${name}\n`;
-  message += `*Phone:* ${phone}\n`;
-  message += `*Delivery Method:* ${method}${address ? `\n*Address:* ${address}` : ''}\n`;
-  message += `*Delivery Charge:* KSh ${deliveryCharge}\n`;
-  if (notes) message += `*Notes:* ${notes}\n`;
-  message += `\n*Order Details:*\n`;
-
-  cart.forEach(item => {
-    message += `• ${item.title} x${item.qty} - KSh ${(item.price * item.qty).toFixed(2)}\n`;
-  });
-
-  message += `\n*Total:* KSh ${total}\n`;
-  message += `\nThank you for your order!`;
-
-  const businessNumber = "254102949969"; // replace with your WhatsApp number
-  const whatsappURL = `https://wa.me/${businessNumber}?text=${encodeURIComponent(message)}`;
-  window.open(whatsappURL, "_blank");
-
-  // Close modal and reset cart
-  checkoutModal.style.display = "none";
-  cart = [];
+  deliveryAddressContainer.style.display = deliveryMethod.value === "delivery" ? "block" : (deliveryMethod.value === "70" ? "block" : "none");
   renderCart();
 });
 
-// --- LOYALTY POINTS SYSTEM ---
-let userPoints = parseInt(localStorage.getItem("loyaltyPoints") || "0");
+/* Checkout modal close */
+closeCheckoutBtn.addEventListener("click", () => { checkoutModal.style.display = "none"; });
 
-function updatePointsInfo() {
-  document.getElementById("pointsInfo").innerHTML = `You have <strong>${userPoints}</strong> points.`;
-}
+/* Add WhatsApp button next to Place Order (but we will handle saving to Firestore first) */
+const placeOrderWhatsappBtn = document.createElement("button");
+placeOrderWhatsappBtn.id = "placeOrderWhatsappBtn";
+placeOrderWhatsappBtn.textContent = "Place Order via WhatsApp";
+placeOrderWhatsappBtn.className = "whatsapp-btn";
+placeOrderBtn.parentNode.insertBefore(placeOrderWhatsappBtn, placeOrderBtn.nextSibling);
 
-document.getElementById("viewPointsBtn").addEventListener("click", () => {
-  updatePointsInfo();
-  document.getElementById("pointsModal").style.display = "flex";
-});
+/* WhatsApp + Firestore flow:
+   1) Validate fields & cart
+   2) Build orderData (same structure as Place Order)
+   3) Save to Firestore with source: 'whatsapp'
+   4) Then open WhatsApp link with the same message
+   5) Reset UI
+*/
+placeOrderWhatsappBtn.addEventListener("click", async () => {
+  try {
+    const name = customerName.value.trim();
+    const phone = customerPhone.value.trim();
+    const method = deliveryMethod.value;
+    const address = deliveryAddress.value.trim();
+    const notes = orderNotes.value.trim();
+    const total = parseFloat(checkoutTotal.textContent) || 0;
+    const deliveryCharge = getDeliveryChargeVal();
 
-document.getElementById("redeemPointsBtn").addEventListener("click", () => {
-  if (userPoints < 50) {
-    alert("⚠️ You need at least 50 points to redeem!");
-    return;
+    if (!name || !phone || cart.length === 0) {
+      alert("Please enter your name, phone, and have at least one item in the cart.");
+      return;
+    }
+
+    // Build order payload
+    const orderCode = "ORD-" + Date.now();
+    const orderData = {
+      code: orderCode,
+      items: cart.map(i => ({ id: i.id || null, title: i.title, price: i.price, qty: i.qty, image: i.image || '' })),
+      subtotal: cart.reduce((s, i) => s + i.price * i.qty, 0),
+      deliveryCharge,
+      total: total,
+      customer: {
+        name,
+        phone,
+        delivery: method,
+        address: address || ""
+      },
+      notes: notes || "",
+      status: "Pending",
+      source: "whatsapp",
+      date: new Date()
+    };
+
+    // Save to Firestore first (so admin sees it immediately)
+    await addDoc(collection(db, "orders"), orderData);
+
+    // Build professional WhatsApp message
+    let message = `🛒 *New Order Received*\n`;
+    message += `*Code:* ${orderCode}\n`;
+    message += `*Customer:* ${name}\n`;
+    message += `*Phone:* ${phone}\n`;
+    message += `*Delivery Method:* ${method}${address ? `\n*Address:* ${address}` : ''}\n`;
+    message += `*Delivery Charge:* KSh ${deliveryCharge}\n`;
+    if (notes) message += `*Notes:* ${notes}\n`;
+    message += `\n*Order Details:*\n`;
+    cart.forEach(item => {
+      message += `• ${item.title} x${item.qty} - KSh ${(item.price * item.qty).toFixed(2)}\n`;
+    });
+    message += `\n*Total:* KSh ${total}\n`;
+    message += `\nThank you for your order!`;
+
+    const businessNumber = "254102949969"; // replace with your WhatsApp number
+    const whatsappURL = `https://wa.me/${businessNumber}?text=${encodeURIComponent(message)}`;
+
+    // Open WhatsApp in new tab/window
+    window.open(whatsappURL, "_blank");
+
+    // Provide user feedback and reset
+    alert("✅ Your order has been recorded and WhatsApp will open now. Thank you!");
+    cart = [];
+    renderCart();
+    checkoutModal.style.display = "none";
+    customerName.value = "";
+    customerPhone.value = "";
+    deliveryAddress.value = "";
+    orderNotes.value = "";
+
+    // Update loyalty points (same as placeOrder)
+    const earnedPoints = Math.floor(orderData.subtotal / 50);
+    userPoints += earnedPoints;
+    localStorage.setItem("loyaltyPoints", userPoints);
+    alert(`🎁 You earned ${earnedPoints} points! You now have ${userPoints} total.`);
+
+  } catch (err) {
+    console.error("Error sending WhatsApp order:", err);
+    alert("Failed to record the WhatsApp order. Please try again.");
   }
-  userPoints -= 50;
-  localStorage.setItem("loyaltyPoints", userPoints);
-  alert("🎉 You redeemed 50 points for a KSh 50 discount!");
-  updatePointsInfo();
 });
 
-
-// -- Load Products --
-onSnapshot(collection(db,"products"), snapshot=>{
-  allProducts = [];
-  snapshot.forEach(docSnap=>{
-    const p = {...docSnap.data(), id: docSnap.id};
-    allProducts.push(p);
-  });
-  renderProducts(allProducts);
-});
-
-// -- Render Products --
-function renderProducts(products){
-  productsGrid.innerHTML="";
-  products.forEach(p=>{
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <img src="${p.image}" alt="${p.title}">
-      <div class="product-info">
-        <h4>${p.title}</h4>
-        <p>KSh ${p.price}</p>
-        <div class="qty-container"><button onclick="decreaseQtyCard(this)">-</button><span>1</span><button onclick="increaseQtyCard(this)">+</button></div>
-        <button class="add-cart">Add to Cart</button>
-        <button class="add-fav" style="margin-top:6px;background:#ffd633;color:#333;border:none;padding:6px 12px;border-radius:10px;font-weight:700;cursor:pointer;">⭐ Favorite</button>
-      </div>
-    `;
-    let qtySpan = card.querySelector(".qty-container span");
-    card.querySelector(".add-cart").addEventListener("click",()=>{
-      const qty = parseInt(qtySpan.textContent);
-      const existing = cart.find(i=>i.id===p.id);
-      if(existing){ existing.qty += qty; } else { cart.push({id:p.id,title:p.title,price:p.price,qty,image:p.image}); }
-      renderCart();
-      alert("✅ Added to cart!");
-    });
-    card.querySelector(".add-fav").addEventListener("click",()=>{
-      if(!favorites.find(f=>f.id===p.id)){ favorites.push({id:p.id,title:p.title,price:p.price,image:p.image}); localStorage.setItem("favorites",JSON.stringify(favorites)); alert("⭐ Added to favorites!"); } else { alert("Already in favorites!"); }
-    });
-    productsGrid.appendChild(card);
-  });
-}
-
-// Card qty buttons
-window.increaseQtyCard=btn=>{ let span=btn.parentElement.querySelector("span"); span.textContent=parseInt(span.textContent)+1; }
-window.decreaseQtyCard=btn=>{ let span=btn.parentElement.querySelector("span"); if(parseInt(span.textContent)>1) span.textContent=parseInt(span.textContent)-1; }
-
-// -- Cart Modal --
-viewCartBtn.addEventListener("click",()=>{ orderModal.style.display="flex"; renderCart(); });
-closeModalBtn.addEventListener("click",()=>{ orderModal.style.display="none"; });
-proceedCheckoutBtn.addEventListener("click",()=>{ orderModal.style.display="none"; checkoutModal.style.display="flex"; checkoutTotal.textContent=cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2); });
-
-// -- Checkout Modal --
-closeCheckoutBtn.addEventListener("click",()=>{ checkoutModal.style.display="none"; });
-deliveryMethod.addEventListener("change",()=>{
-  deliveryAddressContainer.style.display = deliveryMethod.value==="delivery"?"block":"none";
-});
-
-
-
-
-// -- Place Order & Generate PDF --
+/* Place order (regular button) — unchanged behavior, saves to Firestore and generates PDF */
 placeOrderBtn.addEventListener("click", async () => {
   if (!customerName.value || !customerPhone.value || (deliveryMethod.value === "delivery" && !deliveryAddress.value)) {
     alert("Please fill all required fields!");
@@ -638,11 +597,13 @@ placeOrderBtn.addEventListener("click", async () => {
   }
 
   const orderCode = "ORD-" + Date.now();
-  const totalValue = cart.reduce((s, i) => s + i.price * i.qty, 0) + (deliveryMethod.value === "delivery" ? 40 : 0);
-  
+  const totalValue = cart.reduce((s, i) => s + i.price * i.qty, 0) + (deliveryMethod.value === "delivery" ? 40 : (deliveryMethod.value === "70" ? 70 : 0));
+
   const orderData = {
     code: orderCode,
-    items: cart,
+    items: cart.map(i => ({ id: i.id || null, title: i.title, price: i.price, qty: i.qty, image: i.image || '' })),
+    subtotal: cart.reduce((s, i) => s + i.price * i.qty, 0),
+    deliveryCharge: (deliveryMethod.value === "delivery" ? 40 : (deliveryMethod.value === "70" ? 70 : 0)),
     total: totalValue,
     customer: {
       name: customerName.value,
@@ -652,57 +613,63 @@ placeOrderBtn.addEventListener("click", async () => {
     },
     notes: orderNotes.value || "",
     status: "Pending",
+    source: "web",
     date: new Date()
   };
-  await addDoc(collection(db, "orders"), orderData);
-  alert("✅ Order submitted!");
 
-  // 🎯 ADD LOYALTY POINTS HERE
-  const earnedPoints = Math.floor(totalValue / 50); // 1 point per 100 KSh
-  userPoints += earnedPoints;
-  localStorage.setItem("loyaltyPoints", userPoints);
-  alert(`🎁 You earned ${earnedPoints} points! You now have ${userPoints} total.`);
-  
+  try {
+    await addDoc(collection(db, "orders"), orderData);
+    alert("✅ Order submitted!");
 
-  // PDF generation (unchanged)
-  const doc = new jsPDF();
-  doc.setFontSize(18); doc.text("SIP & DRIP Fast Food & Ice Cream", 14, 20);
-  doc.setFontSize(12); doc.text(`Order Receipt`, 14, 30);
-  doc.text(`Order Code: ${orderCode}`, 14, 38);
-  doc.text(`Name: ${customerName.value}`, 14, 46);
-  doc.text(`Phone: ${customerPhone.value}`, 14, 54);
-  doc.text(`Delivery: ${deliveryMethod.value}`, 14, 62);
-  if (deliveryMethod.value === "delivery") doc.text(`Address: ${deliveryAddress.value}`, 14, 70);
-  doc.text(`Notes: ${orderNotes.value || "N/A"}`, 14, 78);
-  let y = 86; doc.text("Items:", 14, y);
-  cart.forEach(item => { y += 8; doc.text(`- ${item.title} x ${item.qty} = KSh ${(item.price * item.qty).toFixed(2)}`, 18, y); });
-  y += 10; doc.text(`Total: KSh ${totalValue.toFixed(2)}`, 14, y); y += 8; doc.text("Thank you for your order!", 14, y);
-  doc.save(`${orderCode}.pdf`);
+    // Add loyalty points
+    const earnedPoints = Math.floor(orderData.subtotal / 50);
+    userPoints += earnedPoints;
+    localStorage.setItem("loyaltyPoints", userPoints);
+    alert(`🎁 You earned ${earnedPoints} points! You now have ${userPoints} total.`);
 
-  // Reset (unchanged)
-  cart = [];
-  renderCart();
-  checkoutModal.style.display = "none";
-  customerName.value = "";
-  customerPhone.value = "";
-  deliveryAddress.value = "";
-  orderNotes.value = "";
+    // PDF generation
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.text("SIP & DRIP Fast Food & Ice Cream", 14, 20);
+    doc.setFontSize(12); doc.text(`Order Receipt`, 14, 30);
+    doc.text(`Order Code: ${orderCode}`, 14, 38);
+    doc.text(`Name: ${customerName.value}`, 14, 46);
+    doc.text(`Phone: ${customerPhone.value}`, 14, 54);
+    doc.text(`Delivery: ${deliveryMethod.value}`, 14, 62);
+    if (deliveryMethod.value === "delivery") doc.text(`Address: ${deliveryAddress.value}`, 14, 70);
+    doc.text(`Notes: ${orderNotes.value || "N/A"}`, 14, 78);
+    let y = 86; doc.text("Items:", 14, y);
+    cart.forEach(item => { y += 8; doc.text(`- ${item.title} x ${item.qty} = KSh ${(item.price * item.qty).toFixed(2)}`, 18, y); });
+    y += 10; doc.text(`Total: KSh ${totalValue.toFixed(2)}`, 14, y); y += 8; doc.text("Thank you for your order!", 14, y);
+    doc.save(`${orderCode}.pdf`);
+
+    // Reset
+    cart = [];
+    renderCart();
+    checkoutModal.style.display = "none";
+    customerName.value = "";
+    customerPhone.value = "";
+    deliveryAddress.value = "";
+    orderNotes.value = "";
+
+  } catch (err) {
+    console.error("Place order error:", err);
+    alert("Failed to place order: " + (err.message || err));
+  }
 });
 
-// -- Favorites Modal --
+/* Favorites modal functionality */
 viewFavoritesBtn.addEventListener("click", () => {
   favoritesBody.innerHTML = "";
-  if(favorites.length === 0){
+  if (favorites.length === 0) {
     favoritesBody.innerHTML = "<p>No favorites yet.</p>";
+    favoritesModal.style.display = "flex";
     return;
   }
-
   favorites.forEach((f, i) => {
     const div = document.createElement("div");
     div.style.display = "flex";
     div.style.alignItems = "center";
     div.style.marginBottom = "10px";
-
     div.innerHTML = `
       <img src="${f.image}" style="width:60px;height:60px;border-radius:10px;margin-right:10px;">
       <span style="flex:1;">${f.title}</span>
@@ -711,61 +678,54 @@ viewFavoritesBtn.addEventListener("click", () => {
     `;
     favoritesBody.appendChild(div);
   });
-
   favoritesModal.style.display = "flex";
 });
 
-// -- Add favorite item to cart --
+/* Add favorite item to cart */
 window.addFavToCart = i => {
   const f = favorites[i];
   const existing = cart.find(c => c.id === f.id);
-  if(existing){ existing.qty++; }
-  else { cart.push({id: f.id, title: f.title, price: f.price, qty: 1, image: f.image}); }
+  if (existing) existing.qty++;
+  else cart.push({ id: f.id, title: f.title, price: f.price, qty: 1, image: f.image });
   renderCart();
   alert("✅ Added from favorites!");
-}
+};
 
-// -- Remove favorite --
+/* Remove favorite */
 window.removeFavorite = i => {
-  if(confirm("Remove this item from favorites?")){
-    favorites.splice(i, 1);
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-    viewFavoritesBtn.click(); // Refresh modal
-  }
-}
+  if (!confirm("Remove this item from favorites?")) return;
+  favorites.splice(i, 1);
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  viewFavoritesBtn.click();
+};
 
-// -- My Orders Modal --
-viewOrdersBtn.addEventListener("click", ()=>{
-  const phone = prompt("Enter your phone number to view your orders:"); // or get from logged-in user
-  if(!phone) return;
-
+/* My Orders modal - allow customer to check by phone */
+viewOrdersBtn.addEventListener("click", () => {
+  const phone = prompt("Enter your phone number to view your orders:");
+  if (!phone) return;
   myOrdersBody.innerHTML = "";
-  const q = query(collection(db,"orders"), orderBy("date","desc"));
+  const q = query(collection(db, "orders"), orderBy("date", "desc"));
   onSnapshot(q, snapshot => {
     myOrdersBody.innerHTML = "";
     snapshot.forEach(docSnap => {
       const o = docSnap.data();
-      if(o.customer.phone !== phone) return; // Only show this user's orders
-
+      if (!o.customer || o.customer.phone !== phone) return;
       const div = document.createElement("div");
       div.style.border = "1px solid #ddd";
       div.style.padding = "10px";
       div.style.marginBottom = "8px";
       div.style.borderRadius = "12px";
-
-      // Include images for each item
-      let itemsHtml = o.items.map(i => `
+      let itemsHtml = (o.items || []).map(i => `
         <div style="display:flex;align-items:center;margin-bottom:4px;">
-          <img src="${i.image}" style="width:50px;height:50px;border-radius:8px;margin-right:8px;">
+          <img src="${i.image || ''}" style="width:50px;height:50px;border-radius:8px;margin-right:8px;">
           <span>${i.title} x ${i.qty}</span>
         </div>
       `).join("");
-
       div.innerHTML = `<p><strong>Code:</strong> ${o.code}</p>
         <div><strong>Items:</strong>${itemsHtml}</div>
-        <p><strong>Total:</strong> KSh ${o.total.toFixed(2)}</p>
+        <p><strong>Total:</strong> KSh ${Number(o.total || 0).toFixed(2)}</p>
         <p><strong>Status:</strong> ${o.status}</p>
-        <button onclick="downloadOrder('${o.code}',${JSON.stringify(o.items)},${o.total},'${o.customer.name}','${o.customer.phone}','${o.customer.delivery}','${o.customer.address}','${o.notes}')"
+        <button onclick="downloadOrder('${o.code}',${JSON.stringify(o.items || [])},${Number(o.total||0)},'${(o.customer||{}).name||''}','${(o.customer||{}).phone||''}','${(o.customer||{}).delivery||''}','${(o.customer||{}).address||''}','${o.notes||''}')"
         style="background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:6px;margin-right:6px;">Download PDF</button>
         <button onclick="cancelOrder('${docSnap.id}')" style="background:var(--danger);color:#fff;border:none;padding:6px 10px;border-radius:6px;">Cancel</button>`;
       myOrdersBody.appendChild(div);
@@ -774,7 +734,7 @@ viewOrdersBtn.addEventListener("click", ()=>{
   myOrdersModal.style.display = "flex";
 });
 
-// -- Download PDF --
+/* Download order - same as earlier */
 window.downloadOrder = (code, items, total, name, phone, delivery, address, notes) => {
   const doc = new jsPDF();
   doc.setFontSize(18); doc.text("🍔 Fast Food & Ice Cream", 14, 20);
@@ -783,266 +743,116 @@ window.downloadOrder = (code, items, total, name, phone, delivery, address, note
   doc.text(`Name: ${name}`, 14, 46);
   doc.text(`Phone: ${phone}`, 14, 54);
   doc.text(`Delivery: ${delivery}`, 14, 62);
-  if(delivery === "delivery") doc.text(`Address: ${address}`, 14, 70);
+  if (delivery === "delivery") doc.text(`Address: ${address}`, 14, 70);
   doc.text(`Notes: ${notes || "N/A"}`, 14, 78);
-
   let y = 86;
   doc.text("Items:", 14, y);
-  items.forEach(item => {
+  (items || []).forEach(item => {
     y += 8;
     doc.text(`- ${item.title} x ${item.qty}`, 18, y);
   });
-
   y += 10;
-  doc.text(`Total: KSh ${total.toFixed(2)}`, 14, y);
+  doc.text(`Total: KSh ${Number(total || 0).toFixed(2)}`, 14, y);
   y += 8;
   doc.text("Thank you for your order!", 14, y);
-
-  // Only download when user clicks Download button
   doc.save(`${code}.pdf`);
 };
 
-// -- Cancel Order --
+/* Cancel order */
 window.cancelOrder = async id => {
-  if(confirm("Are you sure you want to cancel this order?")){
-    await deleteDoc(doc(db,"orders",id));
-    alert("Order canceled.");
-  }
+  if (!confirm("Are you sure you want to cancel this order?")) return;
+  await deleteDoc(doc(db, "orders", id));
+  alert("Order canceled.");
 };
 
-// -- Search & Category Filter --
-searchInput.addEventListener("input",()=>{ filterProducts(); });
-categoryFilter.addEventListener("change",()=>{ filterProducts(); });
+/* Search & category filter */
+const searchInput = document.getElementById("searchInput");
+const categoryFilter = document.getElementById("categoryFilter");
+searchInput.addEventListener("input", filterProducts);
+categoryFilter.addEventListener("change", filterProducts);
 function filterProducts(){
-  const search=searchInput.value.toLowerCase();
-  const category=categoryFilter.value;
-  let filtered=allProducts.filter(p=>p.title.toLowerCase().includes(search));
-  if(category!=="all") filtered=filtered.filter(p=>p.category===category);
+  const search = searchInput.value.toLowerCase();
+  const category = categoryFilter.value;
+  let filtered = allProducts.filter(p => p.title.toLowerCase().includes(search));
+  if (category !== "all") filtered = filtered.filter(p => p.category === category);
   renderProducts(filtered);
 }
-</script>
-<!-- Paste this inside your existing <script type="module"> (after allProducts is available) -->
-<script>
-// --- SIPDRIP AI: Smart Order Detection (paste into your module script) ---
 
-// helpers: map word-numbers to digits
-const WORD_NUMBERS = {
-  'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10
-};
-
-// Select AI chat elements (they are present in your HTML)
-const aiBtn = document.getElementById('sipdripAIButton');
-
-const closeAIChat = document.getElementById('closeAIChat');
-const aiSendBtn = document.getElementById('aiSendBtn');
-
-
-
-if (aiBtn && aiChat && aiSendBtn && aiUserInput && aiChatContent) {
-  // toggle
-  aiBtn.addEventListener('click', ()=> aiChat.style.display = 'flex');
-  closeAIChat.addEventListener('click', ()=> aiChat.style.display = 'none');
-
-  // Append a chat message into the chat window
-  function addAIMessage(text, sender = 'bot', img = null) {
-    const msg = document.createElement('div');
-    msg.style.margin = '10px 0';
-    msg.style.display = 'flex';
-    msg.style.flexDirection = sender === 'user' ? 'row-reverse' : 'row';
-    msg.innerHTML = `
-      <div style="background:${sender === 'user' ? '#FFA94D' : '#eee'};
-                  color:${sender === 'user' ? '#fff' : '#333'};
-                  padding:8px 12px; border-radius:10px; max-width:80%;">
-        ${text}
-        ${img ? `<br><img src="${img}" style="margin-top:8px; border-radius:8px; width:100%; max-width:260px;">` : ''}
-      </div>
-    `;
-    aiChatContent.appendChild(msg);
-    aiChatContent.scrollTop = aiChatContent.scrollHeight;
-  }
-
-  // Very small fuzzy matcher: returns product with highest score (title contains tokens)
-  function findBestProductMatch(query) {
-    if (!allProducts || !allProducts.length) return null;
-    const q = query.toLowerCase();
-    // Try exact substring first
-    let exact = allProducts.find(p => p.title.toLowerCase() === q);
-    if (exact) return exact;
-    // token matching
-    const tokens = q.split(/\s+/).filter(Boolean);
-    let best = null;
-    let bestScore = 0;
-    allProducts.forEach(p => {
-      const title = (p.title || '').toLowerCase();
-      let score = 0;
-      tokens.forEach(t => {
-        if (title.includes(t)) score += 2;               // token found
-        if (title.startsWith(t)) score += 1;             // prefix bonus
-      });
-      // also boost if category or short token matches (e.g., "shake", "ice", "mango")
-      if (score > bestScore) { best = p; bestScore = score; }
-    });
-    // require at least 2 points to avoid accidental false positives (tweak if needed)
-    return bestScore >= 2 ? best : null;
-  }
-
-  // parse quantity: finds numeric digits or word numbers (one..ten)
-  function extractQuantity(text) {
-    // look for digits first
-    const digitMatch = text.match(/(\d+)\s*(x|pcs|pieces|s)?/i);
-    if (digitMatch) return parseInt(digitMatch[1], 10);
-    // look for word numbers
-    for (const [word, val] of Object.entries(WORD_NUMBERS)) {
-      const regex = new RegExp(`\\b${word}\\b`, 'i');
-      if (regex.test(text)) return val;
-    }
-    // if text contains 'a ' or 'an ' before item -> 1
-    if (/\b(a|an)\b\s+\w+/i.test(text)) return 1;
-    return null; // unknown
-  }
-
-  // entry point: process user message for order intent
-  function processAIInput(text) {
-    const lower = text.toLowerCase();
-    // quick checks for order intent keywords
-    const orderKeywords = ['order','i want','i\'d like','add','get','can i have','can i get','buy','please'];
-    const isOrderIntent = orderKeywords.some(k => lower.includes(k)) && 
-                         (lower.includes('ice') || lower.includes('shake') || lower.includes('milk') || lower.includes('hot dog') || lower.includes('coffee') || lower.includes('ice cream') || allProducts.some(p => lower.includes(p.title.toLowerCase().split(' ')[0])));
-    if (!isOrderIntent) return null;
-
-    // try to extract quantity
-    let qty = extractQuantity(text);
-
-    // try to find product phrase: attempt using whole text, then removing qty words and order words
-    // remove common order words to improve matching
-    let cleaned = text.replace(/\b(order|please|i want|i'd like|can i have|can i get|add|buy|get|one|two|three|four|five|six|seven|eight|nine|ten|a|an|please|pcs|pieces|x)\b/ig, '').trim();
-
-    // Try several matching strategies
-    const attempts = [
-      cleaned,
-      text, // raw
-      lower.replace(/\b(order|please|i want|i'd like|can i have|can i get|add|buy|get|please)\b/ig,'').trim(),
-      // try single tokens
-    ];
-
-    let found = null;
-    for (const attempt of attempts) {
-      if (!attempt) continue;
-      found = findBestProductMatch(attempt);
-      if (found) break;
-    }
-
-    // fallback: search for each product's first word presence
-    if (!found) {
-      for (const p of allProducts) {
-        const first = (p.title||'').split(' ')[0].toLowerCase();
-        if (first && lower.includes(first)) { found = p; break; }
-      }
-    }
-
-    if (!found) return null;
-
-    // if qty not found, default to 1
-    if (!qty) qty = 1;
-
-    return { product: found, qty };
-  }
-
-  // Add to cart and reply in chat
-  function addProductToCartAndConfirm(product, qty) {
-    // Use same cart item shape as your existing code
-    const existing = cart.find(c => c.id === product.id || c.title === product.title);
-    if (existing) {
-      existing.qty = (existing.qty || 1) + qty;
-    } else {
-      // push minimal fields used by renderCart
-      cart.push({
-        id: product.id || product.title,
-        title: product.title || product.name,
-        price: Number(product.price || product.price || 0),
-        qty: qty,
-        image: product.image || product.img || product.imageUrl || product.imgUrl || ''
-      });
-    }
-    // persist if you want (site already uses localStorage for favorites; adapt as needed)
-    // localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart(); // update cart modal UI (uses your existing renderCart)
-
-    // Chat confirmation card
-    const lineTotal = (Number(product.price || product.price || 0) * qty).toFixed(2);
-    const msgHtml = `
-      ✅ <b>Added to cart:</b><br>
-      <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
-        <img src="${product.image || product.img || ''}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;">
-        <div>
-          <div style="font-weight:700;">${product.title || product.name}</div>
-          <div>${qty} × KSh ${product.price} = KSh ${lineTotal}</div>
-          <div style="margin-top:6px;">
-            <button id="aiCheckoutBtn" style="background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">Checkout</button>
-            <button id="aiKeepBtn" style="background:#ffd633;color:#333;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;margin-left:6px;">Keep browsing</button>
-          </div>
-        </div>
-      </div>
-    `;
-    addAIMessage(msgHtml, 'bot', null);
-
-    // Hook up the buttons (they'll exist after next event loop tick)
-    setTimeout(()=>{
-      const checkoutBtn = document.getElementById('aiCheckoutBtn');
-      const keepBtn = document.getElementById('aiKeepBtn');
-      if (checkoutBtn) checkoutBtn.addEventListener('click', () => {
-        // open checkout modal and populate total
-        checkoutModal.style.display = 'flex';
-        checkoutTotal.textContent = cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
-      });
-      if (keepBtn) keepBtn.addEventListener('click', () => {
-        addAIMessage("Great — keep browsing! Ask me to add anything else 😊", 'bot');
-      });
-    }, 100);
-  }
-
-  // main send handler for AI chat (wraps existing sendAIMessage)
-  async function handleAISend() {
-    const text = aiUserInput.value.trim();
-    if (!text) return;
-    addAIMessage(text, 'user');
-    aiUserInput.value = '';
-
-    // small typing delay
-    setTimeout(() => {
-      // first, attempt smart order detection
-      const order = processAIInput(text);
-      if (order && order.product) {
-        addProductToCartAndConfirm(order.product, order.qty);
-        return;
-      }
-
-      // fallback to your existing getAIResponse (if you have one), else simple replies
-      // If you have getAIResponse in scope, use it:
-      if (typeof getAIResponse === 'function') {
-        const resp = getAIResponse(text);
-        // getAIResponse in your page returns {text, img} or {text}
-        if (resp) {
-          if (typeof resp === 'object') addAIMessage(resp.text || resp, 'bot', resp.img || null);
-          else addAIMessage(resp, 'bot');
-          return;
-        }
-      }
-
-      // generic fallback
-      addAIMessage("Sorry, I didn't understand. I can help add items to your cart — try 'I want a Mango Ice Cream' or '2 vanilla shakes'", 'bot');
-    }, 600);
-  }
-
-  // wire send button & enter key
-  aiSendBtn.addEventListener('click', handleAISend);
-  aiUserInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') handleAISend();
+/* Load products from Firestore */
+onSnapshot(collection(db, "products"), snapshot => {
+  allProducts = [];
+  snapshot.forEach(docSnap => {
+    const p = { ...docSnap.data(), id: docSnap.id };
+    allProducts.push(p);
   });
-} // end if elements exist
+  renderProducts(allProducts);
+});
 
-// --- end of Smart Order Detection snippet ---
+/* Render products grid */
+function renderProducts(products){
+  productsGrid.innerHTML = "";
+  products.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <img src="${p.image || ''}" alt="${p.title}">
+      <div class="product-info">
+        <h4>${p.title}</h4>
+        <p>KSh ${p.price}</p>
+        <div class="qty-container"><button onclick="decreaseQtyCard(this)">-</button><span>1</span><button onclick="increaseQtyCard(this)">+</button></div>
+        <button class="add-cart">Add to Cart</button>
+        <button class="add-fav" style="margin-top:6px;background:#ffd633;color:#333;border:none;padding:6px 12px;border-radius:10px;font-weight:700;cursor:pointer;">⭐ Favorite</button>
+      </div>
+    `;
+    let qtySpan = card.querySelector(".qty-container span");
+    card.querySelector(".add-cart").addEventListener("click", () => {
+      const qty = parseInt(qtySpan.textContent);
+      const existing = cart.find(i => i.id === p.id);
+      if (existing) existing.qty += qty;
+      else cart.push({ id: p.id, title: p.title, price: Number(p.price || 0), qty, image: p.image || '' });
+      renderCart();
+      alert("✅ Added to cart!");
+    });
+    card.querySelector(".add-fav").addEventListener("click", () => {
+      if (!favorites.find(f => f.id === p.id)) {
+        favorites.push({ id: p.id, title: p.title, price: p.price, image: p.image });
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+        alert("⭐ Added to favorites!");
+      } else {
+        alert("Already in favorites!");
+      }
+    });
+    productsGrid.appendChild(card);
+  });
+}
+
+/* card qty helpers */
+window.increaseQtyCard = btn => { let span = btn.parentElement.querySelector("span"); span.textContent = parseInt(span.textContent) + 1; }
+window.decreaseQtyCard = btn => { let span = btn.parentElement.querySelector("span"); if (parseInt(span.textContent) > 1) span.textContent = parseInt(span.textContent) - 1; }
+
+/* Cart modal handlers */
+viewCartBtn.addEventListener("click", () => { orderModal.style.display = "flex"; renderCart(); });
+closeModalBtn.addEventListener("click", () => { orderModal.style.display = "none"; });
+proceedCheckoutBtn.addEventListener("click", () => {
+  orderModal.style.display = "none";
+  checkoutModal.style.display = "flex";
+  checkoutTotal.textContent = cart.reduce((s, i) => s + i.price * i.qty, 0).toFixed(2);
+});
+
+/* Loyalty points UI */
+viewPointsBtn.addEventListener("click", () => {
+  document.getElementById("pointsInfo").innerHTML = `You have <strong>${userPoints}</strong> points.`;
+  document.getElementById("pointsModal").style.display = "flex";
+});
+document.getElementById("redeemPointsBtn").addEventListener("click", () => {
+  if (userPoints < 50) { alert("⚠️ You need at least 50 points to redeem!"); return; }
+  userPoints -= 50;
+  localStorage.setItem("loyaltyPoints", userPoints);
+  alert("🎉 You redeemed 50 points for a KSh 50 discount!");
+  document.getElementById("pointsInfo").innerHTML = `You have <strong>${userPoints}</strong> points.`;
+});
+
+
 </script>
-
 </body>
 </html>
