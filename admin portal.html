@@ -1,62 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>POS + Admin Dashboard</title>
+<title>Sip&Drip + Admin Dashboard</title>
+
+<!-- Minimal Google font for nicer UI -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-:root{--bg:#e9ecef;--panel:#f7f7f9;--accent:#2b6cb0;--muted:#6c757d;--card:#fff;--danger:#dc3545;}
-*{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif}
-body{margin:0;background:var(--bg);color:#222}
-.app{max-width:1200px;margin:18px auto;padding:12px}
-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-header h1{font-size:20px;margin:0}
-.layout{display:grid;grid-template-columns:290px 1fr 360px;gap:12px}
-@media(max-width:1000px){.layout{grid-template-columns:1fr;}}
-.left,.center,.right{background:var(--panel);padding:12px;border-radius:6px}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.key{background:var(--card);padding:18px;border-radius:8px;text-align:center;font-size:20px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,0.05);}
-.key:active{transform:translateY(1px);}
-.cart{margin-top:12px;background:#fff;border-radius:6px;padding:8px;height:320px;overflow:auto}
-table{width:100%;border-collapse:collapse}
-th,td{padding:6px;text-align:left;border-bottom:1px solid #eee;font-size:13px}
-.total-banner{background:#fff;padding:10px;border-radius:6px;margin-top:8px;font-weight:700}
-.products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media(max-width:1200px){.products-grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:700px){.products-grid{grid-template-columns:repeat(2,1fr);}}
-.product{background:var(--card);padding:8px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 2px 4px rgba(0,0,0,0.04);position:relative}
-.product img{width:100%;height:100px;object-fit:cover;border-radius:6px}
-.p-title{font-size:13px;color:var(--muted);text-align:center}
-.box{background:#fff;padding:12px;border-radius:8px;margin-bottom:12px}
-.field{display:flex;flex-direction:column;margin-bottom:8px}
-label{font-size:13px;color:var(--muted);margin-bottom:6px}
-input,select{padding:8px;border-radius:6px;border:1px solid #ddd}
-button{padding:8px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;margin-right:4px}
-button.secondary{background:#6c757d}
-button.ghost{background:#fff;color:var(--accent);border:1px solid #ddd}
-footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
-.badge-stock{position:absolute;top:8px;left:8px;background:#fff;padding:4px 8px;border-radius:12px;font-size:12px;box-shadow:0 2px 4px rgba(0,0,0,0.06)}
-.out-stock{opacity:0.6}
-.admin-alert{background:#fff3cd;border:1px solid #ffeeba;padding:8px;border-radius:6px;margin-bottom:8px}
-.low-stock-list{max-height:120px;overflow:auto;padding:6px;background:#fff;border-radius:6px;border:1px dashed #eee}
-.small-muted{font-size:12px;color:var(--muted)}
+  :root{
+    --bg:#f4fbff;
+    --panel:#ffffff;
+    --muted:#22c535;
+    --accent:#0ea5a4; /* teal */
+    --accent-2:#2563eb; /* blue */
+    --accent-3:#fb923c; /* orange */
+    --danger:#ef4444;
+    --card-shadow: 0 6px 18px rgba(16,24,40,0.06);
+    --glass: rgba(255,255,255,0.7);
+  }
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,#f0fbff 0%, #f7f9fc 100%);color:#0f172a; -webkit-font-smoothing:antialiased;}
+  .app{max-width:1200px;margin:20px auto;padding:18px;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  header h1{font-size:22px;margin:0;color:var(--accent-2)}
+  .muted{color:var(--muted);font-size:14px}
+  .top-row{display:flex;gap:12px;align-items:center}
+  .btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent-2);color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--card-shadow)}
+  .btn.ghost{background:transparent;color:var(--accent-2);border:1px solid rgba(37,99,235,0.12)}
+  .btn.danger{background:var(--danger)}
+  .layout{display:grid;grid-template-columns:290px 1fr 360px;gap:14px}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr;}}
+  .left,.center,.right{background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.95));padding:14px;border-radius:12px;box-shadow:var(--card-shadow)}
+  .card-title{font-weight:700;margin-bottom:8px;color:#0f172a}
+  .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .key{background:#fff;padding:18px;border-radius:10px;text-align:center;font-size:18px;cursor:pointer;box-shadow:0 4px 10px rgba(2,6,23,0.06);border:1px solid rgba(2,6,23,0.03)}
+  .key:active{transform:translateY(1px);opacity:0.95}
+  .cart{margin-top:12px;background:transparent;border-radius:10px;padding:6px;height:320px;overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:13px}
+  th{font-size:13px;color:var(--muted);font-weight:600}
+  .total-banner{background:linear-gradient(90deg,#ffffff,#f8fafc);padding:12px;border-radius:10px;margin-top:8px;font-weight:700;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+  .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:1200px){.products-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:700px){.products-grid{grid-template-columns:repeat(2,1fr);}}
+  .product{background:linear-gradient(180deg,#fff,#fcfeff);padding:8px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(8,30,52,0.04);position:relative;border:1px solid rgba(2,6,23,0.03)}
+  .product img{width:100%;height:110px;object-fit:cover;border-radius:8px}
+  .p-title{font-size:13px;color:var(--muted);text-align:center}
+  .box{background:#fff;padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:var(--card-shadow)}
+  .field{display:flex;flex-direction:column;margin-bottom:8px}
+  label{font-size:13px;color:var(--muted);margin-bottom:6px}
+  input,select{padding:10px;border-radius:8px;border:1px solid #e6eef6;background:#fbfeff}
+  button{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;margin-right:6px}
+  button.secondary{background:#1cc967}
+  .badge-stock{position:absolute;top:10px;left:10px;background:#fff;padding:6px 10px;border-radius:999px;font-size:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06);font-weight:700}
+  .out-stock{opacity:0.6;filter:grayscale(0.05)}
+  .admin-alert{background:#fff3cd;border:1px solid #ffeeba;padding:10px;border-radius:8px;margin-bottom:8px}
+  .low-stock-list{max-height:120px;overflow:auto;padding:8px;background:#fff;border-radius:8px;border:1px dashed #eee}
+  .small-muted{font-size:12px;color:var(--muted)}
+  /* analytics cards */
+  .analytics{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .analytic-card{flex:1;min-width:180px;background:linear-gradient(90deg,#ffffff,#fbffff);padding:12px;border-radius:12px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:12px}
+  .analytic-card .num{font-weight:800;font-size:20px;color:#0f172a}
+  .analytic-card .label{color:var(--muted);font-size:13px}
+  .chip{padding:6px 10px;border-radius:999px;background:rgba(37,99,235,0.08);color:var(--accent-2);font-weight:700;font-size:12px}
+  /* offers bar */
+  #offerBar{
+    background:linear-gradient(90deg,var(--accent-3),#ff6b6b);
+    color:#fff;font-weight:700;padding:10px 18px;display:flex;align-items:center;justify-content:center;gap:12px;overflow:hidden;position:fixed;top:10px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1100px;border-radius:10px;z-index:12000;box-shadow:0 12px 30px rgba(250,99,55,0.12)
+  }
+  #offerBar.hidden{display:none}
+  /* popup for new orders */
+  #orderAlertPopup{border-radius:12px}
+  /* inventory table styling */
+  .inventory-table {width:100%;border-collapse:collapse}
+  .inventory-table th, .inventory-table td {padding:8px;border-bottom:1px solid #f1f5f9}
+  .status-available {color:#059669;font-weight:700}
+  .status-out {color:var(--danger);font-weight:700}
+  /* small helpers */
+  .muted-light{color:#94a3b8}
 </style>
 </head>
 <body>
+
+<!-- Offer notification bar (centered top) -->
+<div id="offerBar" class="hidden" aria-live="polite">
+  <span id="offerText">Loading offers...</span>
+  <span id="offerBadge" class="chip" style="display:none"></span>
+</div>
+
 <div class="app">
   <header>
-    <h1>WPOS</h1>
-    <div class="muted">Click a product to add. Use keypad to enter quantity or cash.</div>
-    <div style="margin-left:auto">
-      <button id="logoutBtn" style="display:none">Logout</button>
+    <div style="display:flex;flex-direction:column;">
+      <h1>Sip&Drip</h1>
+      <div class="muted">Drip with Flavor, Sip with Style</div>
+    </div>
+
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button id="openOffersBtn" class="btn">Manage Offers</button>
+      <button id="logoutBtn" class="btn ghost" style="display:none">Logout</button>
     </div>
   </header>
+
+  <!-- analytics cards -->
+  <div class="analytics">
+    <div class="analytic-card">
+      <div>
+        <div class="label">Total Orders</div>
+        <div id="cardOrders" class="num">0</div>
+      </div>
+      <div style="margin-left:auto"><span class="muted-light">Live</span></div>
+    </div>
+
+    <div class="analytic-card">
+      <div>
+        <div class="label">Items In Stock</div>
+        <div id="cardStock" class="num">0</div>
+      </div>
+      <div style="margin-left:auto"><span class="muted-light">Inventory</span></div>
+    </div>
+
+    <div class="analytic-card">
+      <div>
+        <div class="label">Active Offers</div>
+        <div id="cardOffers" class="num">0</div>
+      </div>
+      <div style="margin-left:auto"><span class="muted-light">Promos</span></div>
+    </div>
+  </div>
 
   <div class="layout">
     <!-- POS Left -->
     <div class="left">
       <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
-        <div style="font-weight:700">Calculator / Qty</div>
+        <div class="card-title">Calculator / Qty</div>
         <div class="muted">Qty: <span id="qtyDisplay">1</span></div>
       </div>
 
@@ -70,7 +148,7 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
       <div class="cart">
         <table id="cartTable">
           <thead>
-            <tr><th>Item</th><th style="width:60px">Qty</th><th style="width:80px;text-align:right">Amount</th><th>Action</th></tr>
+            <tr><th>Item</th><th style="width:60px">Qty</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px">Action</th></tr>
           </thead>
           <tbody id="cartBody"></tbody>
         </table>
@@ -81,8 +159,8 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
 
     <!-- POS Center -->
     <div class="center">
-      <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:700">Products</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="card-title">Products</div>
         <div class="muted">Tap to add</div>
       </div>
 
@@ -92,14 +170,14 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
     <!-- POS Right -->
     <div class="right">
       <div class="box">
-        <div style="font-weight:800;margin-bottom:6px">Receipt Summary</div>
+        <div class="card-title">Receipt Summary</div>
         <div class="field"><label>Sub Total</label><input type="text" id="subTotal" readonly></div>
         <div class="field"><label>Tax (5%)</label><input type="text" id="taxAmount" readonly></div>
         <div class="field"><label>Total</label><input type="text" id="grandTotal" readonly></div>
       </div>
 
       <div class="box">
-        <div style="font-weight:800;margin-bottom:6px">Payment</div>
+        <div class="card-title">Payment</div>
         <div class="field">
           <label>Method</label>
           <select id="paymentMethod">
@@ -111,17 +189,17 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
         <div class="field"><label>Cash Received</label><input type="text" id="cashInput"></div>
         <div class="field"><label>Change</label><input type="text" id="changeOut" readonly></div>
         <div style="display:flex;gap:8px;margin-top:10px">
-          <button id="payBtn">Pay</button>
-          <button class="secondary" id="resetBtn">Reset</button>
+          <button id="payBtn" class="btn">Pay</button>
+          <button class="secondary btn" id="resetBtn" style="background:#f3f4f6;color:#000">Reset</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Customer Details Modal -->
-  <div id="customerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;">
-    <div style="background:#fff;padding:20px;border-radius:8px;width:320px;position:relative">
-      <h3>Customer Details</h3>
+  <div id="customerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(2,6,23,0.45);justify-content:center;align-items:center;z-index:1000;">
+    <div style="background:#fff;padding:20px;border-radius:12px;width:360px;position:relative;box-shadow:var(--card-shadow)">
+      <h3 style="margin-top:0">Customer Details</h3>
 
       <div class="field">
         <label>Name</label>
@@ -154,17 +232,18 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-        <button id="cancelCust">Cancel</button>
-        <button id="submitCust">Submit</button>
+        <button id="cancelCust" class="btn ghost">Cancel</button>
+        <button id="submitCust" class="btn">Submit Order</button>
       </div>
     </div>
   </div>
 
-  <h3>Orders</h3>
+  <!-- Orders list -->
+  <h3 style="margin-top:20px">Orders</h3>
   <div id="ordersContainer">
     <table style="width:100%;border-collapse:collapse;">
       <thead>
-        <tr style="background:#2b6cb0;color:#fff;text-align:left;">
+        <tr style="background:linear-gradient(90deg,var(--accent-2),#0ea5a4);color:#fff;text-align:left;">
           <th>Name</th><th>Phone</th><th>Delivery</th><th>Address</th><th>Items</th><th>Qty</th><th>Amount</th><th>Time</th><th>Payment</th><th>Status</th><th>Actions</th>
         </tr>
       </thead>
@@ -173,15 +252,15 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
   </div>
 
   <!-- Login -->
-  <div id="loginPanel">
+  <div id="loginPanel" style="margin-top:18px">
     <h2>Admin Login</h2>
     <div class="field"><label>Email</label><input id="loginEmail" type="text"></div>
     <div class="field"><label>Password</label><input id="loginPass" type="password"></div>
-    <button id="loginBtn">Login</button>
+    <button id="loginBtn" class="btn">Login</button>
   </div>
 
   <!-- Admin Panel -->
-  <div id="adminPanel" style="display:none">
+  <div id="adminPanel" style="display:none;margin-top:18px">
     <h2>Admin Dashboard</h2>
 
     <!-- Low-stock alert + filter -->
@@ -200,35 +279,71 @@ footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
       <div class="low-stock-list" id="lowStockList"></div>
     </div>
 
-    <div class="field"><label>Title</label><input id="title" type="text"></div>
-    <div class="field"><label>Price</label><input id="price" type="number"></div>
-    <div class="field"><label>Stock Quantity</label><input id="stock" type="number" min="0" value="0"></div>
-    <div class="field"><label>Image</label><input id="imageFile" type="file" accept="image/*"></div>
-    <div style="margin-top:8px;">
-      <button id="addBtn">Add Product</button>
-      <button id="updateBtn" class="secondary" style="display:none">Update Product</button>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div class="field"><label>Title</label><input id="title" type="text"></div>
+      </div>
+      <div style="width:140px">
+        <div class="field"><label>Price</label><input id="price" type="number"></div>
+      </div>
+      <div style="width:140px">
+        <div class="field"><label>Cost</label><input id="cost" type="number" placeholder="cost"></div>
+      </div>
+      <div style="width:160px">
+        <div class="field"><label>SKU</label><input id="sku" type="text" placeholder="SKU"></div>
+      </div>
+      <div style="width:140px">
+        <div class="field"><label>Stock Qty</label><input id="stock" type="number" min="0" value="0"></div>
+      </div>
     </div>
-    <h3>Products</h3>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+      <div class="field" style="flex:1">
+        <label>Image</label>
+        <input id="imageFile" type="file" accept="image/*">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:22px">
+        <button id="addBtn" class="btn">Add Product</button>
+        <button id="updateBtn" class="btn ghost" style="display:none">Update Product</button>
+        <button id="clearForm" class="btn ghost">Clear</button>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">Inventory</h3>
+    <div class="box" style="padding:0;overflow:auto">
+      <table class="inventory-table">
+        <thead style="background:#f8fafc">
+          <tr>
+            <th>Product</th><th>SKU</th><th>Price</th><th>Cost</th><th>Stock</th><th>Availability</th><th>Last Updated</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryList"></tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top:18px">Products (compact)</h3>
     <div id="productList"></div>
   </div>
 
-  <!-- Offers Modal -->
-  <div id="offersModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;">
-    <div style="background:#fff;padding:20px;border-radius:8px;width:350px;position:relative">
-      <h3>Manage Offers</h3>
+  <!-- Offers Modal (unchanged UI but styled) -->
+  <div id="offersModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(2,6,23,0.45);justify-content:center;align-items:center;z-index:1000;">
+    <div style="background:#fff;padding:20px;border-radius:12px;width:420px;position:relative;box-shadow:var(--card-shadow)">
+      <h3 style="margin-top:0">Manage Offers</h3>
+
       <div class="field"><label>Title</label><input type="text" id="offerTitle" placeholder="Offer title"></div>
       <div class="field"><label>Discount (%)</label><input type="number" id="offerDiscount" placeholder="Discount"></div>
       <div class="field"><label>Expiry Date</label><input type="date" id="offerExpiry"></div>
+
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-        <button id="cancelOfferBtn">Cancel</button>
-        <button id="submitOfferBtn">Submit</button>
+        <button id="cancelOfferBtn" class="btn ghost">Cancel</button>
+        <button id="submitOfferBtn" class="btn">Submit</button>
       </div>
+
       <h4 style="margin-top:12px;">Current Offers</h4>
-      <div id="offersList" style="max-height:150px;overflow:auto"></div>
+      <div id="offersList" style="max-height:180px;overflow:auto"></div>
     </div>
   </div>
 
-  <button id="openOffersBtn" style="margin-top:12px;background:#2b6cb0;color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">Manage Offers</button>
   <audio id="newOrderSound" src="neworder.mp3" preload="auto"></audio>
 </div>
 
@@ -275,17 +390,44 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const productsGrid = document.getElementById("productsGrid");
 const productList = document.getElementById("productList");
+const inventoryList = document.getElementById("inventoryList");
 const lowStockAlert = document.getElementById("lowStockAlert");
 const lowStockList = document.getElementById("lowStockList");
 const lowCount = document.getElementById("lowCount");
 const adminFilter = document.getElementById("adminFilter");
+const offerBar = document.getElementById("offerBar");
+const offerText = document.getElementById("offerText");
+const offerBadge = document.getElementById("offerBadge");
+const cardOrders = document.getElementById("cardOrders");
+const cardStock = document.getElementById("cardStock");
+const cardOffers = document.getElementById("cardOffers");
 
+/* Admin form elements */
+const titleEl = document.getElementById("title");
+const priceEl = document.getElementById("price");
+const stockEl = document.getElementById("stock");
+const imageFileEl = document.getElementById("imageFile");
+const addBtn = document.getElementById("addBtn");
+const updateBtn = document.getElementById("updateBtn");
+const costEl = document.getElementById("cost");
+const skuEl = document.getElementById("sku");
+const clearFormBtn = document.getElementById("clearForm");
+
+/* Offers */
+const offersModal = document.getElementById("offersModal");
+const openOffersBtn = document.getElementById("openOffersBtn");
+const cancelOfferBtn = document.getElementById("cancelOfferBtn");
+const submitOfferBtn = document.getElementById("submitOfferBtn");
+const offersList = document.getElementById("offersList");
+let editingOfferId = null;
+
+/* state */
 let editingProductId = null;
 let cart = [];
 let currentQty = 1;
-const lowStockThreshold = 3; // editable threshold
+const lowStockThreshold = 3;
 
-/* AUTH: make login work consistently */
+/* AUTH */
 loginBtn.addEventListener("click", async (ev) => {
   ev.preventDefault();
   const email = document.getElementById("loginEmail").value.trim();
@@ -293,7 +435,6 @@ loginBtn.addEventListener("click", async (ev) => {
   if (!email || !pass) { alert("Enter email and password"); return; }
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged will handle UI swap
   } catch (err) {
     console.error("Login error:", err);
     alert("Login failed: " + (err.message || err));
@@ -305,28 +446,34 @@ onAuthStateChanged(auth, user => {
   if (user) {
     loginPanel.style.display = "none";
     adminPanel.style.display = "block";
-    logoutBtn.style.display = "inline-block";
+    logoutBtn.style.display = "inline-flex";
     loadProducts();
     loadOrders();
+    loadOffers();
+    loadAnalytics();
   } else {
     loginPanel.style.display = "block";
     adminPanel.style.display = "none";
     logoutBtn.style.display = "none";
-    // still allow browsing products without login:
+    // still show products for POS operations
     loadProducts();
     loadOrders();
+    loadOffers();
+    loadAnalytics();
   }
 });
 
-/* PRODUCTS */
+/* PRODUCTS -> also used as inventory */
 let latestProductsSnapshot = [];
 
 function loadProducts() {
   onSnapshot(collection(db, "products"), snapshot => {
     productsGrid.innerHTML = "";
     productList.innerHTML = "";
+    inventoryList.innerHTML = "";
     latestProductsSnapshot = [];
     const lowStockItems = [];
+    let totalStockCount = 0;
 
     snapshot.forEach(docSnap => {
       const p = docSnap.data();
@@ -348,20 +495,45 @@ function loadProducts() {
       });
       productsGrid.appendChild(div);
 
-      // Admin product list row
+      // compact admin product list row
       const row = document.createElement("p");
       row.dataset.id = docSnap.id;
-      row.innerHTML = `${p.title} - Ksh ${p.price} - Stock: ${p.stock ?? 0} 
-        <button class="editBtn">Edit</button> <button class="deleteBtn">Delete</button>`;
+      row.style.marginBottom = "8px";
+      row.innerHTML = `<strong>${p.title}</strong> — Ksh ${p.price} — Stock: ${p.stock ?? 0}
+        <button class="editBtn" style="margin-left:8px">Edit</button> <button class="deleteBtn" style="margin-left:6px">Delete</button>`;
       productList.appendChild(row);
-      row.querySelector(".editBtn").addEventListener("click", () => editProduct(docSnap.id, p.title, p.price, p.image, p.stock ?? 0));
+      row.querySelector(".editBtn").addEventListener("click", () => editProduct(docSnap.id, p.title, p.price, p.image, p.stock ?? 0, p.cost, p.sku));
       row.querySelector(".deleteBtn").addEventListener("click", () => deleteProduct(docSnap.id));
 
+      // Inventory table row
+      const invTr = document.createElement("tr");
+      const lastUpdated = p.lastUpdated ? (p.lastUpdated.toDate ? p.lastUpdated.toDate().toLocaleString() : new Date(p.lastUpdated).toLocaleString()) : '-';
+      invTr.innerHTML = `
+        <td>${p.title}</td>
+        <td>${p.sku || '-'}</td>
+        <td>KSh ${p.price?.toFixed ? p.price.toFixed(2) : (p.price || 0)}</td>
+        <td>${p.cost ? 'KSh ' + Number(p.cost).toFixed(2) : '-'}</td>
+        <td>${p.stock ?? 0}</td>
+        <td>${(p.stock ?? 0) > 0 ? '<span class="status-available">Available</span>' : '<span class="status-out">Out</span>'}</td>
+        <td>${lastUpdated}</td>
+        <td>
+          <button class="editInvBtn">Edit</button>
+          <button class="delInvBtn" style="margin-left:6px">Delete</button>
+        </td>
+      `;
+      invTr.querySelector(".editInvBtn").addEventListener("click", () => editProduct(docSnap.id, p.title, p.price, p.image, p.stock ?? 0, p.cost, p.sku));
+      invTr.querySelector(".delInvBtn").addEventListener("click", () => deleteProduct(docSnap.id));
+      inventoryList.appendChild(invTr);
+
+      // low stock
       if ((p.stock ?? 0) <= lowStockThreshold) {
         lowStockItems.push({ id: docSnap.id, title: p.title, stock: p.stock ?? 0 });
       }
+
+      totalStockCount += (p.stock ?? 0);
     });
 
+    // low-stock alert
     if (lowStockItems.length) {
       lowStockAlert.style.display = 'block';
       lowCount.textContent = lowStockItems.length;
@@ -372,13 +544,16 @@ function loadProducts() {
       lowCount.textContent = '0';
     }
 
+    // update analytics stock card
+    cardStock.textContent = totalStockCount;
+
     renderAdminListByFilter();
   }, err => {
     console.error("Products snapshot error:", err);
   });
 }
 
-adminFilter.addEventListener("change", renderAdminListByFilter);
+adminFilter && adminFilter.addEventListener("change", renderAdminListByFilter);
 
 function renderAdminListByFilter() {
   productList.innerHTML = "";
@@ -393,44 +568,58 @@ function renderAdminListByFilter() {
   filtered.forEach(p => {
     const row = document.createElement("p");
     row.dataset.id = p.id;
-    row.innerHTML = `${p.title} - Ksh ${p.price} - Stock: ${p.stock ?? 0} 
-      <button class="editBtn">Edit</button> <button class="deleteBtn">Delete</button>`;
+    row.style.marginBottom = "8px";
+    row.innerHTML = `<strong>${p.title}</strong> — Ksh ${p.price} — Stock: ${p.stock ?? 0}
+      <button class="editBtn" style="margin-left:8px">Edit</button> <button class="deleteBtn" style="margin-left:6px">Delete</button>`;
     productList.appendChild(row);
-    row.querySelector(".editBtn").addEventListener("click", () => editProduct(p.id, p.title, p.price, p.image, p.stock ?? 0));
+    row.querySelector(".editBtn").addEventListener("click", () => editProduct(p.id, p.title, p.price, p.image, p.stock ?? 0, p.cost, p.sku));
     row.querySelector(".deleteBtn").addEventListener("click", () => deleteProduct(p.id));
   });
 }
 
+/* ADD / EDIT PRODUCT (now includes cost & sku & lastUpdated) */
 async function addProduct() {
-  const title = document.getElementById("title").value.trim();
-  const price = parseFloat(document.getElementById("price").value);
-  const stock = parseInt(document.getElementById("stock").value) || 0;
-  const file = document.getElementById("imageFile").files[0];
-  if (!title || isNaN(price) || !file) { alert("Fill all fields (title, price, image)"); return; }
-  const fileRef = ref(storage, "products/" + Date.now() + "_" + file.name);
-  await uploadBytes(fileRef, file);
-  const url = await getDownloadURL(fileRef);
-  await addDoc(collection(db, "products"), { title, price, image: url, stock });
+  const title = titleEl.value.trim();
+  const price = parseFloat(priceEl.value);
+  const stock = parseInt(stockEl.value) || 0;
+  const cost = parseFloat(costEl.value) || null;
+  const sku = skuEl.value.trim() || null;
+  const file = imageFileEl.files[0];
+  if (!title || isNaN(price) ) { alert("Fill title and price"); return; }
+  let url = '';
+  if (file) {
+    const fileRef = ref(storage, "products/" + Date.now() + "_" + file.name);
+    await uploadBytes(fileRef, file);
+    url = await getDownloadURL(fileRef);
+  }
+  await addDoc(collection(db, "products"), {
+    title, price, image: url, stock, cost, sku, lastUpdated: new Date()
+  });
   alert("Product added!");
   resetForm();
 }
 
-function editProduct(id, title, price, image, stock) {
-  document.getElementById("title").value = title;
-  document.getElementById("price").value = price;
-  document.getElementById("stock").value = stock;
+function editProduct(id, title, price, image, stock, cost, sku) {
+  titleEl.value = title || "";
+  priceEl.value = price ?? "";
+  stockEl.value = stock ?? "0";
+  costEl.value = cost ?? "";
+  skuEl.value = sku ?? "";
   editingProductId = id;
-  document.getElementById("addBtn").style.display = "none";
-  document.getElementById("updateBtn").style.display = "inline-block";
+  addBtn.style.display = "none";
+  updateBtn.style.display = "inline-flex";
 }
 
 async function updateProduct() {
   if (!editingProductId) return;
-  const title = document.getElementById("title").value.trim();
-  const price = parseFloat(document.getElementById("price").value);
-  const stock = parseInt(document.getElementById("stock").value) || 0;
-  const file = document.getElementById("imageFile").files[0];
-  let updatedData = { title, price, stock };
+  const title = titleEl.value.trim();
+  const price = parseFloat(priceEl.value);
+  const stock = parseInt(stockEl.value) || 0;
+  const cost = parseFloat(costEl.value) || null;
+  const sku = skuEl.value.trim() || null;
+  const file = imageFileEl.files[0];
+  if (!title || isNaN(price)) { alert("Fill title and price"); return; }
+  let updatedData = { title, price, stock, cost, sku, lastUpdated: new Date() };
   if (file) {
     const fileRef = ref(storage, "products/" + Date.now() + "_" + file.name);
     await uploadBytes(fileRef, file);
@@ -443,47 +632,48 @@ async function updateProduct() {
 }
 
 function resetForm() {
-  document.getElementById("title").value = "";
-  document.getElementById("price").value = "";
-  document.getElementById("stock").value = "0";
-  document.getElementById("imageFile").value = "";
-  document.getElementById("addBtn").style.display = "inline-block";
-  document.getElementById("updateBtn").style.display = "none";
+  titleEl.value = "";
+  priceEl.value = "";
+  stockEl.value = "0";
+  imageFileEl.value = "";
+  costEl.value = "";
+  skuEl.value = "";
+  addBtn.style.display = "inline-flex";
+  updateBtn.style.display = "none";
 }
+clearFormBtn.addEventListener("click", resetForm);
 
 async function deleteProduct(id) {
   if (confirm("Delete product?")) await deleteDoc(doc(db, "products", id));
 }
 
-/* ORDERS & NOTIFICATIONS */
+/* ORDERS & LIVE NOTIFICATIONS */
 let previousPendingOrders = 0;
 const orderSound = new Audio("neworder.mp3");
 orderSound.loop = true;
 
-/* popup creation */
 const popup = document.createElement("div");
 popup.id = "orderAlertPopup";
 popup.style.position = "fixed";
 popup.style.top = "50%";
 popup.style.left = "50%";
 popup.style.transform = "translate(-50%, -50%)";
-popup.style.width = "320px";
-popup.style.minHeight = "180px";
+popup.style.width = "360px";
+popup.style.minHeight = "160px";
 popup.style.background = "#ff4d4d";
 popup.style.color = "#fff";
 popup.style.padding = "20px";
 popup.style.borderRadius = "12px";
-popup.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
+popup.style.boxShadow = "0 2px 12px rgba(0,0,0,0.18)";
 popup.style.display = "none";
 popup.style.zIndex = "9999";
-popup.style.fontWeight = "600";
+popup.style.fontWeight = "700";
 popup.style.display = "flex";
 popup.style.flexDirection = "column";
 popup.style.justifyContent = "center";
 popup.style.alignItems = "center";
 popup.style.textAlign = "center";
 popup.style.gap = "12px";
-
 popup.innerHTML = `
   <span id="blinkText" style="font-size:18px; animation: blink 1s infinite;">🔔 New Orders Received!</span>
   <div id="ordersListPopup" style="text-align:left; max-height:120px; overflow:auto; width:100%;"></div>
@@ -496,15 +686,15 @@ popup.innerHTML = `
     font-weight:600;
     cursor:pointer;">Mark as Read</button>
 `;
-const styleTag = document.createElement("style");
-styleTag.innerHTML = `@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }`;
-document.head.appendChild(styleTag);
+document.head.insertAdjacentHTML('beforeend', `<style>@keyframes blink {0%{opacity:1}50%{opacity:0}100%{opacity:1}}</style>`);
 document.body.appendChild(popup);
+
 popup.querySelector("#markAsReadBtn").addEventListener("click", () => {
   orderSound.pause();
   orderSound.currentTime = 0;
   popup.style.display = "none";
 });
+
 document.addEventListener("click", () => {
   orderSound.play().then(()=>{ orderSound.pause(); orderSound.currentTime = 0; }).catch(()=>{});
 }, { once:true });
@@ -519,11 +709,7 @@ function loadOrders() {
 
     snapshot.forEach(docSnap => {
       const o = docSnap.data();
-      // format timestamp (handle Firestore Timestamp or plain Date string)
-      const ts = o.timestamp
-        ? (o.timestamp.toDate ? o.timestamp.toDate().toLocaleString() : new Date(o.timestamp).toLocaleString())
-        : new Date().toLocaleString();
-
+      const ts = o.timestamp ? (o.timestamp.toDate ? o.timestamp.toDate().toLocaleString() : new Date(o.timestamp).toLocaleString()) : new Date().toLocaleString();
       const itemsStr = (o.items || []).map(i => i.title).join(", ");
       const qtyStr = (o.items || []).map(i => i.qty).join(", ");
       const tr = document.createElement("tr");
@@ -539,8 +725,8 @@ function loadOrders() {
         <td>${o.paymentMethod || 'N/A'}</td>
         <td id="status-${docSnap.id}">${o.status || 'Pending'}</td>
         <td>
-          ${o.status === 'Pending' ? `<button class="completeBtn">Complete</button><button class="cancelBtn">Cancel</button>` : ''}
-          <button class="deleteOrderBtn">Delete</button>
+          ${o.status === 'Pending' ? `<button class="completeBtn">Complete</button><button class="cancelBtn" style="margin-left:6px">Cancel</button>` : ''}
+          <button class="deleteOrderBtn" style="margin-left:6px">Delete</button>
         </td>`;
       list.appendChild(tr);
 
@@ -556,14 +742,14 @@ function loadOrders() {
 
       if (o.status === "Pending") {
         pendingCount++;
-        newOrders.push(`${o.customer?.name || 'N/A'} - ${ts}`);
+        newOrders.push(`${o.customer?.name || 'N/A'} — ${ts}`);
       }
     });
 
     if (pendingCount > previousPendingOrders && newOrders.length) {
       orderSound.play().catch(()=>{});
       const ordersDiv = popup.querySelector("#ordersListPopup");
-      ordersDiv.innerHTML = newOrders.map(o => `<div>${o}</div>`).join("");
+      ordersDiv.innerHTML = newOrders.map(o => `<div style="padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.12)">${o}</div>`).join("");
       popup.style.display = "flex";
     }
 
@@ -574,40 +760,58 @@ function loadOrders() {
     }
 
     previousPendingOrders = pendingCount;
+
+    // update total orders analytic
+    cardOrders.textContent = snapshot.size;
   });
 }
 
-/* OFFERS (no change) */
-const offersModal = document.getElementById("offersModal");
-const openOffersBtn = document.getElementById("openOffersBtn");
-const cancelOfferBtn = document.getElementById("cancelOfferBtn");
-const submitOfferBtn = document.getElementById("submitOfferBtn");
-const offersList = document.getElementById("offersList");
-let editingOfferId = null;
+/* OFFERS */
 openOffersBtn.addEventListener("click", ()=> offersModal.style.display = "flex");
 cancelOfferBtn.addEventListener("click", ()=> { offersModal.style.display = "none"; clearOfferForm(); });
+
 const offersRef = collection(db, "offers");
-onSnapshot(offersRef, snapshot => {
-  offersList.innerHTML = "";
-  snapshot.forEach(docSnap => {
-    const o = docSnap.data();
-    const div = document.createElement("div");
-    div.style.marginBottom = "6px";
-    div.innerHTML = `<strong>${o.title}</strong> - ${o.discount}% OFF - Expires: ${o.expiry || '-'}
-      <button class="editOfferBtn">Edit</button>
-      <button class="deleteOfferBtn">Delete</button>`;
-    offersList.appendChild(div);
-    div.querySelector(".editOfferBtn").addEventListener("click", () => {
-      document.getElementById("offerTitle").value = o.title;
-      document.getElementById("offerDiscount").value = o.discount;
-      document.getElementById("offerExpiry").value = o.expiry || "";
-      editingOfferId = docSnap.id;
+function loadOffers() {
+  onSnapshot(offersRef, snapshot => {
+    offersList.innerHTML = "";
+    const activeOffers = [];
+    snapshot.forEach(docSnap => {
+      const o = docSnap.data();
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+      div.style.padding = "8px";
+      div.style.borderRadius = "8px";
+      div.style.background = "#fbfbff";
+      div.innerHTML = `<strong>${o.title}</strong> — ${o.discount}% OFF — Expires: ${o.expiry || '-'}
+        <div style="margin-top:6px"><button class="editOfferBtn" style="margin-right:6px">Edit</button><button class="deleteOfferBtn">Delete</button></div>`;
+      offersList.appendChild(div);
+      div.querySelector(".editOfferBtn").addEventListener("click", () => {
+        document.getElementById("offerTitle").value = o.title;
+        document.getElementById("offerDiscount").value = o.discount;
+        document.getElementById("offerExpiry").value = o.expiry || "";
+        editingOfferId = docSnap.id;
+      });
+      div.querySelector(".deleteOfferBtn").addEventListener("click", async () => {
+        if (confirm("Delete this offer?")) await deleteDoc(doc(db, "offers", docSnap.id));
+      });
+
+      // treat as active if not expired (simple client check)
+      if (!o.expiry || new Date(o.expiry) >= new Date()) activeOffers.push(o);
     });
-    div.querySelector(".deleteOfferBtn").addEventListener("click", async () => {
-      if (confirm("Delete this offer?")) await deleteDoc(doc(db, "offers", docSnap.id));
-    });
+
+    // analytics & offer bar update
+    cardOffers.textContent = activeOffers.length;
+    if (activeOffers.length) {
+      offerBar.classList.remove('hidden');
+      offerText.textContent = activeOffers.map(o=>`${o.title} - ${o.discount}%`).join(" • ");
+      offerBadge.style.display = "inline-block";
+      offerBadge.textContent = `${activeOffers.length} active`;
+    } else {
+      offerBar.classList.add('hidden');
+    }
   });
-});
+}
+
 submitOfferBtn.addEventListener("click", async () => {
   const title = document.getElementById("offerTitle").value.trim();
   const discount = parseFloat(document.getElementById("offerDiscount").value);
@@ -659,13 +863,13 @@ function renderCart() {
     const amount = item.price * item.qty;
     subtotal += amount;
     const qtyDisplay = item.qty > (item.stock ?? 0) ? `${item.qty} (insufficient)` : item.qty;
-    tr.innerHTML = `<td>${item.title}</td><td>${qtyDisplay}</td><td style="text-align:right">${amount.toFixed(2)}</td><td><button class="removeItemBtn">Remove</button></td>`;
+    tr.innerHTML = `<td>${item.title}</td><td>${qtyDisplay}</td><td style="text-align:right">${amount.toFixed(2)}</td><td><button class="removeItemBtn" style="padding:6px 8px;border-radius:8px;background:#ff6b6b;color:#fff;border:0">Remove</button></td>`;
     tr.querySelector(".removeItemBtn").addEventListener("click", () => { cart.splice(index, 1); renderCart(); });
     cartBody.appendChild(tr);
   });
   document.getElementById("miniTotal").textContent = `Total is Ksh ${subtotal.toFixed(2)}`;
   document.getElementById("subTotal").value = subtotal.toFixed(2);
-  const tax = subtotal * 0.0;
+  const tax = +(subtotal * 0.05).toFixed(2);
   document.getElementById("taxAmount").value = tax.toFixed(2);
   const total = subtotal + tax;
   document.getElementById("grandTotal").value = total.toFixed(2);
@@ -693,7 +897,7 @@ document.getElementById("cashInput").addEventListener("input", () => {
   document.getElementById("changeOut").value = cash - total >= 0 ? (cash - total).toFixed(2) : 0;
 });
 
-/* PAY => opens customer modal */
+/* PAY => open customer modal */
 document.getElementById("payBtn").addEventListener("click", () => {
   if (cart.length === 0) { alert("Cart empty"); return; }
   for (const it of cart) {
@@ -708,7 +912,7 @@ document.getElementById("cancelCust").addEventListener("click", () => {
   document.getElementById("customerModal").style.display = "none";
 });
 
-/* SUBMIT ORDER: using one atomic transaction to update products and create order */
+/* SUBMIT ORDER (transactional) */
 document.getElementById("submitCust").addEventListener("click", async () => {
   const name = document.getElementById("custName").value.trim();
   const phone = document.getElementById("custPhone").value.trim();
@@ -728,7 +932,6 @@ document.getElementById("submitCust").addEventListener("click", async () => {
   const cashReceived = parseFloat(document.getElementById("cashInput").value) || 0;
   const change = parseFloat(document.getElementById("changeOut").value) || 0;
 
-  // Prepare items for order
   const selectedItems = cart.map(item => ({
     id: item.id,
     title: item.title,
@@ -737,7 +940,6 @@ document.getElementById("submitCust").addEventListener("click", async () => {
     total: item.price * item.qty
   }));
 
-  // client-side final check
   for (const it of cart) {
     if (it.qty > (it.stock ?? 0)) { alert(`Insufficient stock for ${it.title}. Available: ${it.stock || 0}`); return; }
   }
@@ -757,30 +959,21 @@ document.getElementById("submitCust").addEventListener("click", async () => {
   };
 
   try {
-    // Create a new order docRef with an ID and run a transaction to:
-    // 1) check stock for each product
-    // 2) decrement product.stock
-    // 3) set the order document
-    const orderRef = doc(collection(db, "orders")); // new document ref with generated ID
-
+    const orderRef = doc(collection(db, "orders"));
     await runTransaction(db, async (transaction) => {
-      // read & update all product docs
       for (const it of selectedItems) {
         const pRef = doc(db, "products", it.id);
         const pSnap = await transaction.get(pRef);
         if (!pSnap.exists()) throw new Error(`Product ${it.title} no longer exists`);
         const currentStock = (pSnap.data().stock ?? 0);
         if (currentStock < it.qty) throw new Error(`Insufficient stock for ${it.title}. Available: ${currentStock}`);
-        transaction.update(pRef, { stock: currentStock - it.qty });
+        transaction.update(pRef, { stock: currentStock - it.qty, lastUpdated: new Date() });
       }
-      // set order
       transaction.set(orderRef, orderData);
     });
 
-    // success
-    alert(`Order successfully saved!\nCustomer: ${name}\nItems: ${selectedItems.map(i => `${i.title} (${i.qty})`).join(", ")}\nTotal: KSh ${total.toFixed(2)}`);
+    alert(`Order saved!\nCustomer: ${name}\nItems: ${selectedItems.map(i => `${i.title} (${i.qty})`).join(", ")}\nTotal: KSh ${total.toFixed(2)}`);
 
-    // Reset cart and UI
     cart = [];
     renderCart();
     document.getElementById("cashInput").value = "";
@@ -807,13 +1000,25 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   document.getElementById("qtyDisplay").textContent = currentQty;
 });
 
-/* Buttons for product add/update */
-document.getElementById("addBtn").addEventListener("click", addProduct);
-document.getElementById("updateBtn").addEventListener("click", updateProduct);
+/* product add/update bindings */
+addBtn.addEventListener("click", addProduct);
+updateBtn.addEventListener("click", updateProduct);
 
-/* Kick off an initial products load so customers can see products even if not logged */
+/* load analytics for top cards (orders, stock, offers) */
+function loadAnalytics() {
+  // orders count
+  onSnapshot(collection(db, "orders"), snapshot => {
+    cardOrders.textContent = snapshot.size;
+  });
+  // items in stock is updated inside loadProducts (sum)
+  // offers count handled in loadOffers
+}
+
+/* initial loads so POS works without login */
 loadProducts();
 loadOrders();
+loadOffers();
+loadAnalytics();
 
 </script>
 </body>
